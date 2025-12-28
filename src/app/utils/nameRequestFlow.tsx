@@ -34,8 +34,9 @@ export function createNameRequestMessage(
           ]}
           submitLabel="סגור"
           onSubmit={(values) => {
-            if (values.firstName?.trim()) {
-              onNameSubmit(values.firstName.trim());
+            const firstName = values.firstName;
+            if (typeof firstName === 'string' && firstName.trim()) {
+              onNameSubmit(firstName.trim());
             }
           }}
         />
