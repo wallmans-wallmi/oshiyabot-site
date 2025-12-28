@@ -3726,11 +3726,6 @@ export default function App() {
                       aria-label="לראות את המעקבים שלך"
                     >
                       המעקבים שלי
-                      {unreadDealsCount > 0 && activeTab === 'chat' && (
-                        <span className="absolute -top-1 -left-1 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" aria-label={`${unreadDealsCount} מבצעים חדשים`}>
-                          {unreadDealsCount}
-                        </span>
-                      )}
                     </button>
                   </div>
                 </div>
