@@ -2374,6 +2374,11 @@ export default function App() {
                     ]}
                     submitLabel="סגור, שלחי"
                     onSubmit={(values) => {
+                      // Safely handle phone value - ensure it's a string before calling .replace()
+                      if (typeof values.phone !== 'string') {
+                        return; // Early return if phone is not a string (shouldn't happen for tel input)
+                      }
+                      
                       const phone = values.phone.replace(/\s/g, '');
                       const isValidIsraeliPhone = /^05\d{8}$/.test(phone);
                       
@@ -2389,6 +2394,11 @@ export default function App() {
                                 inputs={[{ id: 'phone', type: 'tel', placeholder: 'מספר טלפון (לדוגמה: 0501234567)', inputMode: 'tel' }]}
                                 submitLabel="סגור, שלחי"
                                 onSubmit={(retryValues) => {
+                                  // Safely handle phone value - ensure it's a string before calling .replace()
+                                  if (typeof retryValues.phone !== 'string') {
+                                    return; // Early return if phone is not a string (shouldn't happen for tel input)
+                                  }
+                                  
                                   const retryPhone = retryValues.phone.replace(/\s/g, '');
                                   const maskedPhone = retryPhone.slice(0, 3) + '***' + retryPhone.slice(-4);
                                   setConversationState(prev => ({ ...prev, step: 7, productData: { ...prev.productData, phone: retryPhone } }));
