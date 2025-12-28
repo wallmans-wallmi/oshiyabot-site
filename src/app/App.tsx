@@ -3271,7 +3271,7 @@ export default function App() {
       
       {/* Desktop layout with fixed header for main pages + Mobile chat */}
       {((isDesktop && !['demo', 'ui-foundations', 'login', 'otp', 'premium-selection', 'payment'].includes(currentPage)) || (!isDesktop && currentPage === 'chat')) && (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 to-pink-50 overflow-hidden" dir="rtl">
+    <div className={`${isDesktop ? 'h-screen' : 'h-[100dvh]'} flex flex-col bg-gradient-to-br from-purple-50 to-pink-50 overflow-hidden`} dir="rtl" style={!isDesktop ? { paddingBottom: 'env(safe-area-inset-bottom)' } : undefined}>
       {/* Header - minimal */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
@@ -3727,10 +3727,76 @@ export default function App() {
       {/* Chat content - only show when on chat page */}
       {currentPage === 'chat' && (
       <>
+      {/* Unified Tabs Bar - Fixed at top on mobile, sticky on desktop */}
+      {!isDesktop && (
+        <div 
+          className={`flex-shrink-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 pt-2 pb-2 z-20 transition-all duration-300 ease-out ${
+            isTabsCollapsed 
+              ? 'pt-2 pb-2' 
+              : 'pt-2 pb-2'
+          }`}
+          style={{ paddingTop: `calc(0.5rem + env(safe-area-inset-top))` }}
+        >
+          <div className={`bg-white/95 backdrop-blur-sm rounded-full border border-gray-200 transition-all duration-300 ${
+            isTabsCollapsed 
+              ? 'p-0.5' 
+              : 'p-1'
+          }`}
+          >
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleTabChange('chat')}
+                className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative whitespace-nowrap ${
+                  isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                } ${
+                  activeTab === 'chat'
+                    ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+                aria-label="לחזור לצ'אט"
+              >
+                <span className="truncate block">צ׳אט</span>
+              </button>
+              <button
+                onClick={() => handleTabChange('looks')}
+                className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
+                  isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                } ${
+                  activeTab === 'looks'
+                    ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+                aria-label="לראות את הלוקים שלי"
+              >
+                <span className="truncate block">לוקים</span>
+              </button>
+              <button
+                onClick={() => handleTabChange('deals')}
+                className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
+                  isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                } ${
+                  activeTab === 'deals'
+                    ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+                aria-label="לראות את המעקבים שלך"
+              >
+                <span className="truncate block">מעקבים</span>
+                {unreadDealsCount > 0 && activeTab !== 'deals' && (
+                  <span className="absolute -top-1 -left-1 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" aria-label={`${unreadDealsCount} מבצעים חדשים`}>
+                    {unreadDealsCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chat messages - scrollable */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 bg-gradient-to-br from-purple-50 to-pink-50"
+        className="flex-1 overflow-y-auto px-4 py-4 pb-24 bg-gradient-to-br from-purple-50 to-pink-50"
         style={{ 
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch'
@@ -3757,74 +3823,76 @@ export default function App() {
         )}
 
         <div className="max-w-3xl mx-auto">
-          {/* Unified Tabs Bar - Always visible for all tabs */}
-          <div 
-            className={`sticky top-0 -mx-4 px-4 z-10 transition-all duration-300 ease-out mb-4 ${
-              isTabsCollapsed 
-                ? 'pt-1 pb-1' 
-                : 'pt-1 pb-1'
-            }`}
-          >
-            <div className={`bg-white/95 backdrop-blur-sm rounded-full border border-gray-200 transition-all duration-300 ${
-              isTabsCollapsed 
-                ? 'p-0.5' 
-                : 'p-1'
-            }`}
+          {/* Unified Tabs Bar - Sticky on desktop, hidden on mobile (already fixed above) */}
+          {isDesktop && (
+            <div 
+              className={`sticky top-0 -mx-4 px-4 z-10 transition-all duration-300 ease-out mb-4 ${
+                isTabsCollapsed 
+                  ? 'pt-1 pb-1' 
+                  : 'pt-1 pb-1'
+              }`}
             >
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleTabChange('chat')}
-                  className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative whitespace-nowrap ${
-                    isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
-                  } ${
-                    activeTab === 'chat'
-                      ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                  aria-label="לחזור לצ'אט"
-                >
-                  <span className="truncate block">צ׳אט</span>
-                </button>
-                <button
-                  onClick={() => handleTabChange('looks')}
-                  className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
-                    isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
-                  } ${
-                    activeTab === 'looks'
-                      ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                  aria-label="לראות את הלוקים שלי"
-                >
-                  <span className="truncate block md:inline">
-                    <span className="md:hidden">לוקים</span>
-                    <span className="hidden md:inline">הלוקים שלי</span>
-                  </span>
-                </button>
-                <button
-                  onClick={() => handleTabChange('deals')}
-                  className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
-                    isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
-                  } ${
-                    activeTab === 'deals'
-                      ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                  aria-label="לראות את המעקבים שלך"
-                >
-                  <span className="truncate block md:inline">
-                    <span className="md:hidden">מעקבים</span>
-                    <span className="hidden md:inline">המעקבים שלי</span>
-                  </span>
-                  {unreadDealsCount > 0 && activeTab === 'chat' && (
-                    <span className="absolute -top-1 -left-1 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" aria-label={`${unreadDealsCount} מבצעים חדשים`}>
-                      {unreadDealsCount}
+              <div className={`bg-white/95 backdrop-blur-sm rounded-full border border-gray-200 transition-all duration-300 ${
+                isTabsCollapsed 
+                  ? 'p-0.5' 
+                  : 'p-1'
+              }`}
+              >
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleTabChange('chat')}
+                    className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative whitespace-nowrap ${
+                      isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                    } ${
+                      activeTab === 'chat'
+                        ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                        : 'text-gray-500 hover:bg-gray-50'
+                    }`}
+                    aria-label="לחזור לצ'אט"
+                  >
+                    <span className="truncate block">צ׳אט</span>
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('looks')}
+                    className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
+                      isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                    } ${
+                      activeTab === 'looks'
+                        ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                        : 'text-gray-500 hover:bg-gray-50'
+                    }`}
+                    aria-label="לראות את הלוקים שלי"
+                  >
+                    <span className="truncate block md:inline">
+                      <span className="md:hidden">לוקים</span>
+                      <span className="hidden md:inline">הלוקים שלי</span>
                     </span>
-                  )}
-                </button>
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('deals')}
+                    className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
+                      isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                    } ${
+                      activeTab === 'deals'
+                        ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                        : 'text-gray-500 hover:bg-gray-50'
+                    }`}
+                    aria-label="לראות את המעקבים שלך"
+                  >
+                    <span className="truncate block md:inline">
+                      <span className="md:hidden">מעקבים</span>
+                      <span className="hidden md:inline">המעקבים שלי</span>
+                    </span>
+                    {unreadDealsCount > 0 && activeTab !== 'deals' && (
+                      <span className="absolute -top-1 -left-1 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" aria-label={`${unreadDealsCount} מבצעים חדשים`}>
+                        {unreadDealsCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Filter tabs - only for deals page */}
           {activeTab === 'deals' && deals.length > 0 && (
@@ -3920,7 +3988,7 @@ export default function App() {
 
                     {/* Message bubble */}
                     <div 
-                      className={`flex gap-2 ${msg.type === 'user' ? 'justify-start flex-row-reverse' : 'justify-start'}`}
+                      className={`flex gap-2 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       data-message-date={dateLabel}
                     >
                     {msg.type === 'assistant' && (
@@ -3935,7 +4003,7 @@ export default function App() {
                       </div>
                     )}
                     
-                    <div className={`max-w-[80%] ${msg.type === 'user' ? 'ml-10' : 'mr-10'}`}>
+                    <div className={`max-w-[80%] ${msg.type === 'user' ? 'mr-10' : 'ml-10'}`}>
                       {/* Image if exists */}
                       {msg.image && (
                         <div className="mb-2">
@@ -4290,7 +4358,10 @@ export default function App() {
 
       {/* Input area - fixed at bottom - only show in chat tab */}
       {activeTab === 'chat' && (
-      <div className="flex-shrink-0 bg-white border-t border-purple-100 px-4 py-3 shadow-lg">
+      <div 
+        className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-100 px-4 py-3 shadow-lg z-30"
+        style={!isDesktop ? { paddingBottom: `calc(0.75rem + env(safe-area-inset-bottom))` } : undefined}
+      >
         <div className="max-w-3xl mx-auto">
           {/* Image preview above input */}
           {uploadedImage && (

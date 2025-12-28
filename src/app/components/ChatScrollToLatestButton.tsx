@@ -13,7 +13,7 @@ export function ChatScrollToLatestButton({ onClick, isVisible }: ChatScrollToLat
     <button
       onClick={onClick}
       aria-label="חזרה להודעה האחרונה"
-      className="fixed bottom-24 left-4 md:left-8 w-12 h-12 rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 z-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 border-2"
+      className="fixed bottom-24 left-4 md:left-8 w-12 h-12 rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 z-40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 border-2"
       style={{
         backgroundColor: '#ffffff',
         borderColor: '#e5e7eb',
