@@ -3709,11 +3709,7 @@ export default function App() {
                       onClick={() => handleTabChange('chat')}
                       className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative ${
                         isTabsCollapsed ? 'px-3 py-1.5' : 'px-4 py-2'
-                      } ${
-                        activeTab === 'chat'
-                          ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                          : 'text-gray-500 hover:bg-gray-50'
-                      }`}
+                      } text-gray-500 hover:bg-gray-50`}
                       aria-label="לחזור לצ'אט"
                     >
                       צ׳אט
