@@ -32,6 +32,10 @@ cp .env.example .env.local
 
 3. Configure environment variables in `.env.local`:
 ```env
+# Supabase Configuration (Required)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
 # OpenAI Configuration (optional - uses mock by default)
 OPENAI_API_KEY=your_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
@@ -135,6 +139,38 @@ The application includes:
 ## Storage
 
 Chat conversations are saved to localStorage for persistence across page refreshes. The storage utilities are in `src/lib/storage/chatStorage.ts`.
+
+## Deployment to Render
+
+This project is configured for deployment on [Render](https://render.com).
+
+### Required Environment Variables
+
+Set these in your Render dashboard:
+
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (keep secret!)
+
+### Render Configuration
+
+- **Build Command**: `npm run build`
+- **Start Command**: `npm start`
+- **Node Version**: 18.17.0+ (specified in `package.json`)
+
+### Getting Supabase Credentials
+
+1. Go to Supabase Dashboard → Settings → API
+2. Copy **Project URL** → use as `NEXT_PUBLIC_SUPABASE_URL`
+3. Copy **service_role key** (secret!) → use as `SUPABASE_SERVICE_ROLE_KEY`
+
+### Database Setup
+
+Ensure your Supabase database has a `Watch` table with columns:
+- `id`, `product_name`, `store_key`, `product_url`, `target_type`, `target_value`
+- `phone_e164`, `whatsapp_consent`, `is_active`, `last_price`, `last_checked_at`
+- `created_at`, `updated_at`
+
+**📖 See [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md) for complete deployment guide**
 
 ## Development Notes
 
