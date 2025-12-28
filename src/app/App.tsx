@@ -3271,7 +3271,10 @@ export default function App() {
       
       {/* Desktop layout with fixed header for main pages + Mobile chat */}
       {((isDesktop && !['demo', 'ui-foundations', 'login', 'otp', 'premium-selection', 'payment'].includes(currentPage)) || (!isDesktop && currentPage === 'chat')) && (
-    <div className={`${isDesktop ? 'h-screen' : 'h-[100dvh]'} flex flex-col bg-gradient-to-br from-purple-50 to-pink-50 overflow-hidden`} dir="rtl" style={!isDesktop ? { paddingBottom: 'env(safe-area-inset-bottom)' } : undefined}>
+    <div 
+      className={`${isDesktop ? 'h-screen' : 'h-[100dvh]'} flex flex-col bg-gradient-to-br from-purple-50 to-pink-50 overflow-hidden`} 
+      dir="rtl"
+    >
       {/* Header - minimal */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
@@ -3291,7 +3294,7 @@ export default function App() {
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
             <div>
-              <h1 className="font-bold text-gray-900">אושיית שופינג</h1>
+              <h1 className="font-bold text-gray-900 text-right">אושיית שופינג</h1>
               <p className="text-xs text-gray-500 leading-tight text-right">
                 אני לא מחפשת מבצעים.<br />אני מחכה להזדמנות.
               </p>
@@ -3799,7 +3802,8 @@ export default function App() {
         className="flex-1 overflow-y-auto px-4 py-4 pb-24 bg-gradient-to-br from-purple-50 to-pink-50"
         style={{ 
           scrollBehavior: 'smooth',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain'
         }}
       >
         {/* Floating date indicator */}

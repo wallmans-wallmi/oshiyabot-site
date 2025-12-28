@@ -5,6 +5,17 @@ const config: Config = {
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    'h-[100dvh]',
+    'fixed',
+    'bottom-0',
+    'sticky',
+    'top-0',
+    'overflow-hidden',
+    'overflow-y-auto',
+    'flex-1',
+    'flex-shrink-0',
+  ],
   theme: {
     extend: {
       colors: {
