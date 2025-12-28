@@ -1,0 +1,300 @@
+/* Tailwind CSS directives - must come first */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tailwind layer base styles - must come after @tailwind base */
+@layer base {
+  /* Theme CSS variables and custom properties */
+  :root {
+    --font-size: 16px;
+    --background: #ffffff;
+    --foreground: oklch(0.145 0 0);
+    --card: #ffffff;
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: #030213;
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.95 0.0058 264.53);
+    --secondary-foreground: #030213;
+    --muted: #ececf0;
+    --muted-foreground: #717182;
+    --accent: #e9ebef;
+    --accent-foreground: #030213;
+    --destructive: #d4183d;
+    --destructive-foreground: #ffffff;
+    --border: rgba(0, 0, 0, 0.1);
+    --input: transparent;
+    --input-background: #f3f3f5;
+    --switch-background: #cbced4;
+    --font-weight-medium: 500;
+    --font-weight-normal: 400;
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: #030213;
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+    
+    /* Semantic color tokens for navigation and actions */
+    --neutral-primary: #2d2d2d;
+    --neutral-secondary: #6b7280;
+    --neutral-tertiary: #f3f4f6;
+    --action-primary: #9333ea;
+    --icon-utility: #2d2d2d;
+    
+    /* Semantic text styles */
+    --text-meta-secondary: #6b7280;
+    --text-meta-date: #6b7280;
+    
+    /* Surface styles */
+    --surface-date-separator: #f3f4f6;
+  }
+
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.145 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.145 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.985 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.396 0.141 25.723);
+    --destructive-foreground: oklch(0.637 0.237 25.331);
+    --border: oklch(0.269 0 0);
+    --input: oklch(0.269 0 0);
+    --ring: oklch(0.439 0 0);
+    --font-weight-medium: 500;
+    --font-weight-normal: 400;
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+    --sidebar-ring: oklch(0.439 0 0);
+  }
+  * {
+    @apply border-border;
+  }
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring/50;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+
+  /* Accessibility enhancements */
+  
+  /* Text size adjustments */
+  html.a11y-text-small {
+    font-size: 14px;
+  }
+  
+  html.a11y-text-large {
+    font-size: 18px;
+  }
+  
+  /* Line spacing */
+  html.a11y-line-spacing * {
+    line-height: 1.8 !important;
+  }
+  
+  /* Letter spacing */
+  html.a11y-letter-spacing * {
+    letter-spacing: 0.05em;
+  }
+  
+  /* Reading focus - adds a subtle highlight bar */
+  html.a11y-reading-focus *:focus-within {
+    outline: 2px solid rgba(147, 51, 234, 0.3);
+    outline-offset: 4px;
+  }
+  
+  /* High contrast */
+  html.a11y-high-contrast {
+    --foreground: #000000;
+    --background: #ffffff;
+  }
+  
+  html.a11y-high-contrast * {
+    border-color: #000000 !important;
+  }
+  
+  /* Dark mode override */
+  html.a11y-dark-mode {
+    --background: #1a1a1a;
+    --foreground: #f5f5f5;
+    --card: #2a2a2a;
+    --card-foreground: #f5f5f5;
+  }
+  
+  html.a11y-dark-mode body {
+    background: #1a1a1a;
+    color: #f5f5f5;
+  }
+  
+  /* Highlight links */
+  html.a11y-highlight-links a {
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Reduce motion */
+  html.a11y-reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  /* Keyboard focus enhancement */
+  html.a11y-keyboard-focus *:focus {
+    outline: 3px solid #9333ea !important;
+    outline-offset: 3px !important;
+  }
+  
+  /* Bigger cursor */
+  html.a11y-bigger-cursor,
+  html.a11y-bigger-cursor * {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="black" stroke="white" stroke-width="1" d="M5 3 L5 25 L11 19 L15 28 L18 27 L14 18 L22 18 Z"/></svg>') 0 0, auto !important;
+  }
+
+  /* Fade-in animation for welcome-back message */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 140ms ease-out;
+  }
+
+  /* Fade + slide animation for scroll-to-latest button */
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Fade-out animation */
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* Slide-up animation for bottom sheet */
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 250ms ease-out;
+  }
+}
+
+/* Additional animations outside @layer */
+@keyframes slideInRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
