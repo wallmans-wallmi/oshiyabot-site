@@ -9,12 +9,14 @@ interface TrackingsPageProps {
   onBack: () => void;
   deals: Deal[];
   onDealClick?: (dealId: number) => void;
+  isDesktop?: boolean;
 }
 
 export function TrackingsPage({ 
   onBack, 
   deals = [],
-  onDealClick
+  onDealClick,
+  isDesktop = false
 }: TrackingsPageProps) {
   const [isAccessibilityMenuOpen, setIsAccessibilityMenuOpen] = useState(false);
   const activeDeals = deals.filter(d => d.status === 'active');
@@ -89,23 +91,25 @@ export function TrackingsPage({
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50" dir="rtl">
-      {/* Header */}
-      <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-purple-600" />
-            <h2 className="font-bold text-gray-900">המעקבים שלי</h2>
+    <div className={`${isDesktop ? 'h-full overflow-y-auto' : 'min-h-screen'} bg-gradient-to-br from-purple-50 to-pink-50`} dir="rtl">
+      {/* Header - only show close button on mobile */}
+      {!isDesktop && (
+        <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-purple-600" />
+              <h2 className="font-bold text-gray-900">המעקבים שלי</h2>
+            </div>
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
+              aria-label="סגור"
+            >
+              <X className="w-5 h-5 text-gray-700" />
+            </button>
           </div>
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
-            aria-label="סגור"
-          >
-            <X className="w-5 h-5 text-gray-700" />
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6">
