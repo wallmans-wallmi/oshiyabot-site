@@ -39,7 +39,7 @@ interface Message {
   inlineInputs?: InlineInput[];
   timestamp: Date;
   showAfterDelay?: number;
-  source?: 'script' | 'ai'; // Distinguish between scripted and AI-generated messages
+  source?: 'script' | 'ai' | 'user'; // Distinguish between scripted, AI-generated, and user messages
 }
 
 interface QuickReply {
