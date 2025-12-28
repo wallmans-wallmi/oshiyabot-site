@@ -1989,15 +1989,20 @@ export default function App() {
                     { id: 'priceTarget', type: 'number', placeholder: 'למשל: 2500' }
                   ]}
                   onSubmit={(values) => {
+                    // Normalize priceTarget to string (number inputs always return strings)
+                    const priceTargetValue = typeof values.priceTarget === 'string' 
+                      ? values.priceTarget 
+                      : String(values.priceTarget ?? '');
+                    
                     setConversationState(prev => ({ 
                       ...prev, 
                       step: 6, 
-                      productData: { ...prev.productData, priceTarget: values.priceTarget } 
+                      productData: { ...prev.productData, priceTarget: priceTargetValue } 
                     }));
                     setMessages(prev => [...prev, {
                       id: Date.now(),
                       type: 'user',
-                      content: `מחיר יעד: ₪${values.priceTarget}`,
+                      content: `מחיר יעד: ₪${priceTargetValue}`,
                       timestamp: new Date(),
                     }]);
                     
@@ -2060,15 +2065,20 @@ export default function App() {
                     { id: 'priceRange', type: 'text', placeholder: 'למשל: 2000-3000' }
                   ]}
                   onSubmit={(values) => {
+                    // Normalize priceRange to string (text inputs always return strings)
+                    const priceRangeValue = typeof values.priceRange === 'string' 
+                      ? values.priceRange 
+                      : String(values.priceRange ?? '');
+                    
                     setConversationState(prev => ({ 
                       ...prev, 
                       step: 6, 
-                      productData: { ...prev.productData, priceTarget: values.priceRange } 
+                      productData: { ...prev.productData, priceTarget: priceRangeValue } 
                     }));
                     setMessages(prev => [...prev, {
                       id: Date.now(),
                       type: 'user',
-                      content: `טווח מחיר: ₪${values.priceRange}`,
+                      content: `טווח מחיר: ₪${priceRangeValue}`,
                       timestamp: new Date(),
                     }]);
                     
