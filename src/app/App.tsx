@@ -2,6 +2,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Tag, Send, TrendingDown, Bell, Info, Menu, X, Image as ImageIcon, ExternalLink, MessageCircle, Settings, EllipsisVertical, Pause, Trash2, Pencil, ChevronDown, User, Eye, Shield, Cookie, Scale } from 'lucide-react';
+
+// Extend Window interface for console navigation helper
+declare global {
+  interface Window {
+    oshiyaNavigate?: (page: string) => void;
+  }
+}
+
 const oshiyaAvatar = "/assets/ea9d3f873ca76c584ffa18ac5550589db242a0e0.png";
 import { AboutPage } from './components/AboutPage';
 import { WhatPage } from './components/WhatPage';
@@ -458,10 +466,10 @@ export default function App() {
   useEffect(() => {
     console.log('%c🎨 Oshiya UI Foundations', 'color: #9333ea; font-size: 14px; font-weight: bold;');
     console.log('%cTo view the UI Foundations documentation page, use:', 'color: #666; font-size: 12px;');
-    console.log('%c(window as any).oshiyaNavigate("ui-foundations")', 'background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-family: monospace;');
+    console.log('%cwindow.oshiyaNavigate("ui-foundations")', 'background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-family: monospace;');
     
     // Expose navigation function to window for console access
-    (window as any).oshiyaNavigate = (page: string) => {
+    window.oshiyaNavigate = (page: string) => {
       // Runtime check to validate that the page is in the allowed list
       const allowedPages: PageType[] = ['chat', 'about', 'what', 'how', 'privacy', 'terms', 'demo', 'accessibility', 'accessibility-statement', 'contact', 'login', 'otp', 'account', 'profile', 'trackings', 'settings', 'payment', 'premium-selection', 'ui-foundations'];
       // Type guard: check if page is a valid PageType using type narrowing
@@ -646,8 +654,7 @@ export default function App() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const performSubmit = async () => {
     if (!message.trim() && !uploadedImage) return;
 
     const userMessage: Message = {
@@ -961,8 +968,8 @@ export default function App() {
                       ]}
                       submitLabel="שלח"
                       onSubmit={async (values) => {
-                        const price = (values.price as string)?.trim();
-                        const percentDrop = (values.percentDrop as string)?.trim();
+                        const price = typeof values.price === 'string' ? values.price.trim() : '';
+                        const percentDrop = typeof values.percentDrop === 'string' ? values.percentDrop.trim() : '';
                         
                         if (price) {
                           // User chose specific price
@@ -1021,9 +1028,9 @@ export default function App() {
                       { id: 'percentDrop', type: 'number', placeholder: 'אחוז ירידה (למשל: 10)' }
                     ]}
                     submitLabel="שלח"
-                    onSubmit={async (values) => {
-                      const price = (values.price as string)?.trim();
-                      const percentDrop = (values.percentDrop as string)?.trim();
+                      onSubmit={async (values) => {
+                        const price = typeof values.price === 'string' ? values.price.trim() : '';
+                        const percentDrop = typeof values.percentDrop === 'string' ? values.percentDrop.trim() : '';
                       
                       if (price) {
                         // User chose specific price
@@ -1169,11 +1176,16 @@ export default function App() {
     textarea.style.height = `${newHeight}px`;
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performSubmit();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Submit on Enter (without Shift)
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as any);
+      performSubmit();
     }
     // Allow Shift+Enter for new line
   };
@@ -1542,9 +1554,9 @@ export default function App() {
                       { id: 'percentDrop', type: 'number', placeholder: 'אחוז ירידה (למשל: 10)' }
                     ]}
                     submitLabel="שלח"
-                    onSubmit={async (values) => {
-                      const price = (values.price as string)?.trim();
-                      const percentDrop = (values.percentDrop as string)?.trim();
+                      onSubmit={async (values) => {
+                        const price = typeof values.price === 'string' ? values.price.trim() : '';
+                        const percentDrop = typeof values.percentDrop === 'string' ? values.percentDrop.trim() : '';
                       
                       if (price) {
                         // User chose specific price
@@ -1692,9 +1704,9 @@ export default function App() {
                 ]}
                 submitLabel="סגור, שלחי"
                 onSubmit={async (values) => {
-                  const firstName = (values.firstName as string)?.trim() || '';
-                  const phone_e164 = (values.phone_e164 as string)?.trim() || '';
-                  const whatsapp_consent = values.whatsapp_consent as boolean;
+                  const firstName = typeof values.firstName === 'string' ? values.firstName.trim() : '';
+                  const phone_e164 = typeof values.phone_e164 === 'string' ? values.phone_e164.trim() : '';
+                  const whatsapp_consent = typeof values.whatsapp_consent === 'boolean' ? values.whatsapp_consent : false;
 
                   // Validate inputs
                   const isValidPhone = /^\+972\d{8,9}$/.test(phone_e164);
