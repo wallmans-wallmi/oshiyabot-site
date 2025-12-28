@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { X, Sparkles, Target, Bell, Shield } from 'lucide-react';
 const oshiyaAvatar = "/assets/ea9d3f873ca76c584ffa18ac5550589db242a0e0.png";
 
@@ -34,9 +35,11 @@ export function WhatPage({ onClose, isDesktop = false }: WhatPageProps) {
         {/* Avatar section */}
         <div className="flex justify-center mb-8">
           <div className="relative">
-            <img
+            <Image
               src={oshiyaAvatar}
               alt="אושייה"
+              width={160}
+              height={160}
               className="w-40 h-40 rounded-full object-cover object-center border-4 border-purple-300 shadow-lg"
             />
             <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-4 border-white flex items-center justify-center">
@@ -55,50 +58,27 @@ export function WhatPage({ onClose, isDesktop = false }: WhatPageProps) {
 
             <p>
               פשוט:<br />
-              לעזור לך לא לקנות סתם.<br />
-              לא כי את בזבזנית – כי את חכמה, ויודעת שמבצע טוב זה עניין של תזמון, לא מזל.
+              אני פה כדי לעזור לך לדייק את הלוק,<br />
+              למצוא את הפיסים הנכונים,<br />
+              ולקנות רק כשזה באמת שווה את זה – בסטייל, ובמחיר.
+            </p>
+
+            <p>
+              כי את לא צריכה עוד מבצע.<br />
+              את צריכה מישהי שתבין אותך, את הווייב שלך, את התקציב שלך,<br />
+              ותחבר לך בין סטיילינג אישי לשופינג חכם – בלי לחץ ובלי בולשיט.
             </p>
 
             <p>
               אני לא עוד אתר דילים,<br />
-              לא תיבת ספאם שמפוצצת אותך ב"עד 70%"<br />
-              ולא ציידת קוונים אובססיבית.
+              לא תיבת ספאם שצועקת "עד 70%!!!",<br />
+              ולא אחת שמנסה לדחוף לך לינקים בלי שביקשת.
             </p>
 
             <p>
-              אני אושייה – אלופת ה-AI, שמבינה שופינג.<br />
-              מיומנת בזיהוי ירידות מחיר, יודעת מתי שווה לעצור,<br />
-              וממש לא מתרגשת מכל אדום מהבהב.
-            </p>
-
-            <p>
-              אני שואלת אותך מה בא לך, עוקבת מאחורי הקלעים,<br />
-              ומתריעה רק כשיש באמת סיבה לפתוח את הארנק.
-            </p>
-
-            <div className="pt-4">
-              <p className="font-medium text-gray-800 text-lg mb-4">
-                🛍️ איך זה עובד?
-              </p>
-
-              <div className="space-y-3 mr-4">
-                <p>את כותבת לי מה את רוצה – כמה שיותר מדויק (מותג, דגם, צבע)</p>
-                <p>מגדירים מה נחשב "שווה" בעינייך – מחיר יעד או אחוז ירידה</p>
-                <p>אני עוקבת אחרי זה באתרים הכי רלוונטיים</p>
-                <p>ואם יש ירידה אמיתית – את מקבלת התראה. חד וחלק.</p>
-              </div>
-            </div>
-
-            <div className="pt-4 space-y-2">
-              <p>בלי בולשיט.<br />
-              בלי ספאם.<br />
-              בלי "דיל חם" שכל יום חוזר.</p>
-            </div>
-
-            <p className="text-purple-700 font-medium pt-2">
-              כי שופינג זה החיים,<br />
-              אבל שופינג חכם עם AI שמבינה עניין?<br />
-              זה כבר ליגה אחרת.
+              אני אושייה –<br />
+              עין לסטייל, עין להזדמנות,<br />
+              ושקט בראש של מישהי שעוקבת בשבילך.
             </p>
           </div>
 

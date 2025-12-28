@@ -15,11 +15,13 @@ interface AccountPageProps {
   firstName?: string;
   phoneNumber?: string;
   onLogout?: () => void;
+  onLogin?: () => void;
   onEditPhone?: () => void;
   onUpdateName?: (newName: string) => void;
   isDesktop?: boolean;
   trackings?: TrackingSummary[];
   onNavigateToTrackings?: () => void;
+  isLoggedIn?: boolean;
 }
 
 export function AccountPage({ 
@@ -27,11 +29,13 @@ export function AccountPage({
   firstName, 
   phoneNumber,
   onLogout,
+  onLogin,
   onEditPhone,
   onUpdateName,
   isDesktop = false,
   trackings = [],
-  onNavigateToTrackings
+  onNavigateToTrackings,
+  isLoggedIn = false
 }: AccountPageProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(firstName || '');
@@ -200,15 +204,26 @@ export function AccountPage({
           </div>
         </div>
 
-        {/* Logout Button */}
-        <button
-          onClick={() => setShowLogoutDialog(true)}
-          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-2xl active:bg-gray-50 active:border-gray-400 transition-all"
-          style={{ minHeight: '44px' }}
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">התנתק מהחשבון</span>
-        </button>
+        {/* Login/Logout Button */}
+        {isLoggedIn ? (
+          <button
+            onClick={() => setShowLogoutDialog(true)}
+            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-2xl active:bg-gray-50 active:border-gray-400 transition-all"
+            style={{ minHeight: '44px' }}
+          >
+            <span className="font-medium">התנתקות</span>
+            <LogOut className="w-5 h-5" />
+          </button>
+        ) : (
+          <button
+            onClick={() => onLogin?.()}
+            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-2xl active:bg-gray-50 active:border-gray-400 transition-all"
+            style={{ minHeight: '44px' }}
+          >
+            <span className="font-medium">התחברות</span>
+            <User className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Logout confirmation dialog */}

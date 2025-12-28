@@ -1,8 +1,58 @@
 import React from 'react';
+import Image from 'next/image';
 import { Send, Image as ImageIcon, Sparkles, Tag, TrendingDown, Bell, MessageCircle, Menu, X } from 'lucide-react';
 
+interface Message {
+  id: number | string;
+  type: 'user' | 'assistant';
+  content: string;
+  contentJSX?: React.ReactNode;
+  image?: string;
+  quickReplies?: QuickReply[];
+  inlineInputs?: InlineInput[];
+  timestamp: Date;
+  showAfterDelay?: number;
+  source?: 'script' | 'ai' | 'user';
+  canSaveToLooks?: boolean;
+}
+
+interface QuickReply {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}
+
+interface InlineInput {
+  id: string;
+  type: 'text' | 'number' | 'textarea' | 'tel';
+  placeholder: string;
+  value?: string;
+  inputMode?: 'text' | 'numeric' | 'tel';
+}
+
+interface ConversationState {
+  path: 'initial' | 'has-product' | 'needs-help';
+  step: number;
+  productData: {
+    name?: string;
+    link?: string;
+    image?: string;
+    details?: string;
+    priceTarget?: string;
+    timing?: string;
+    category?: string;
+    requirements?: string;
+    budget?: string;
+    phone?: string;
+    firstName?: string;
+    gender?: 'male' | 'female';
+    target_type?: 'target_price' | 'percent_drop';
+    target_value?: number;
+  };
+}
+
 interface ChatInterfaceProps {
-  messages: any[];
+  messages: Message[];
   isTyping: boolean;
   message: string;
   setMessage: (msg: string) => void;
@@ -11,7 +61,7 @@ interface ChatInterfaceProps {
   uploadedImage: string | null;
   setUploadedImage: (img: string | null) => void;
   handleQuickReply: (value: string) => void;
-  conversationState: any;
+  conversationState: ConversationState;
   isLoggedIn: boolean;
   onLoginClick: () => void;
   onAccountClick: () => void;
@@ -65,7 +115,8 @@ export function ChatInterface({
         {messages.map((msg) => (
           <div 
             key={msg.id} 
-            className={`flex ${msg.type === 'user' ? 'justify-start' : 'justify-end'}`}
+            className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+            data-testid={`message-${msg.id}`}
           >
             <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${
               msg.type === 'user' 
@@ -74,23 +125,25 @@ export function ChatInterface({
             }`}>
               {msg.contentJSX || msg.content}
               {msg.image && (
-                <img src={msg.image} alt="Uploaded" className="mt-2 rounded-lg max-w-full" />
+                <Image src={msg.image} alt="Uploaded" width={400} height={300} className="mt-2 rounded-lg max-w-full" unoptimized />
               )}
               {msg.quickReplies && msg.quickReplies.length > 0 && (
                 <div className="mt-3 space-y-2">
-                  {msg.quickReplies.map((reply: any, index: number) => (
+                  {msg.quickReplies.map((reply: QuickReply, index: number) => (
                     <button
                       key={index}
+                      data-testid="quick-reply-button"
                       onClick={() => handleQuickReply(reply.value)}
                       className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium border border-white/20"
                       style={{ minHeight: '44px' }}
+                      data-quick-reply-value={reply.value}
                     >
                       {reply.label}
                     </button>
                   ))}
                 </div>
               )}
-              {msg.inlineInputs && (
+              {msg.inlineInputs && msg.inlineInputs.length > 0 && (
                 <div className="mt-3">
                   {/* Inline inputs rendering would go here */}
                 </div>
@@ -100,7 +153,7 @@ export function ChatInterface({
         ))}
         
         {isTyping && (
-          <div className="flex justify-end">
+          <div className="flex justify-start" data-testid="typing-indicator">
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl px-4 py-3 max-w-[85%] md:max-w-[70%]">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
@@ -121,11 +174,13 @@ export function ChatInterface({
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-4">
         <div className="max-w-4xl mx-auto">
           {uploadedImage && (
-            <div className="mb-3 relative inline-block">
-              <img src={uploadedImage} alt="To upload" className="max-h-32 rounded-lg" />
+            <div className="mb-3 relative inline-block" data-testid="uploaded-image-container">
+              <Image src={uploadedImage} alt="To upload" width={128} height={128} className="max-h-32 rounded-lg" unoptimized />
               <button
                 onClick={() => setUploadedImage(null)}
                 className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                data-testid="delete-uploaded-image"
+                aria-label="Delete image"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -138,6 +193,7 @@ export function ChatInterface({
                 type="file"
                 accept="image/*"
                 className="hidden"
+                data-testid="file-input"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) handleImageUpload(file);
@@ -151,11 +207,14 @@ export function ChatInterface({
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               placeholder="כתבי כאן..."
               className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              data-testid="message-input"
             />
             <button
               onClick={handleSend}
               disabled={!message.trim() && !uploadedImage}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 rounded-full hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="send-button"
+              aria-label="Send message"
             >
               <Send className="w-5 h-5" />
             </button>

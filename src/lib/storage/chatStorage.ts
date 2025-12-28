@@ -42,12 +42,12 @@ export function loadMessages(): Message[] | null {
     const saved = localStorage.getItem(STORAGE_KEYS.messages);
     if (!saved) return null;
     
-    const parsed = JSON.parse(saved);
+    const parsed = JSON.parse(saved) as Array<Omit<Message, 'timestamp'> & { timestamp: string }>;
     // Restore messages with Date objects
-    return parsed.map((msg: any) => ({
+    return parsed.map((msg) => ({
       ...msg,
       timestamp: new Date(msg.timestamp),
-    }));
+    })) as Message[];
   } catch (error) {
     console.error('Failed to load messages:', error);
     return null;
@@ -141,15 +141,15 @@ export function loadChatSession(): ChatSession | null {
     const saved = localStorage.getItem(STORAGE_KEYS.chatSession);
     if (!saved) return null;
     
-    const parsed = JSON.parse(saved);
+    const parsed = JSON.parse(saved) as Omit<ChatSession, 'messages'> & { messages: Array<Omit<Message, 'timestamp'> & { timestamp: string }> };
     // Restore messages with Date objects
     return {
       ...parsed,
-      messages: parsed.messages.map((msg: any) => ({
+      messages: parsed.messages.map((msg) => ({
         ...msg,
         timestamp: new Date(msg.timestamp),
-      })),
-    };
+      })) as Message[],
+    } as ChatSession;
   } catch (error) {
     console.error('Failed to load chat session:', error);
     return null;

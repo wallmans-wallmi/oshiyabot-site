@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { ArrowRight, Package, TrendingDown, Clock, XCircle, X } from 'lucide-react';
 import { AccessibilityButton } from './AccessibilityButton';
 import { AccessibilityMenu } from './AccessibilityMenu';
@@ -30,10 +31,13 @@ export function TrackingsPage({
     >
       <div className="flex items-start gap-4">
         {deal.imageUrl ? (
-          <img
+          <Image
             src={deal.imageUrl}
             alt={deal.productName}
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-lg object-cover"
+            unoptimized
           />
         ) : (
           <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">

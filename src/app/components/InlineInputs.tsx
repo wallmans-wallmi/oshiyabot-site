@@ -69,6 +69,7 @@ export function InlineInputs({ inputs, onSubmit, submitLabel = 'המשך' }: Inl
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white transition-all duration-200"
               style={{ minHeight: '44px' }}
               inputMode={input.inputMode}
+              dir={input.type === 'tel' ? 'ltr' : undefined}
               aria-label={
                 input.type === 'tel' 
                   ? 'Israeli phone number for WhatsApp' 

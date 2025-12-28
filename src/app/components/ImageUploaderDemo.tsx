@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { X } from 'lucide-react';
 import { ImageUploaderBox } from './ImageUploaderBox';
 
@@ -82,10 +83,13 @@ export function ImageUploaderDemo({ onClose }: ImageUploaderDemoProps) {
                     className="flex items-center justify-between bg-purple-50 px-4 py-3 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
-                      <img
+                      <Image
                         src={img.preview}
                         alt={img.file.name}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 object-cover rounded-lg border-2 border-purple-200"
+                        unoptimized
                       />
                       <div>
                         <p className="font-medium text-gray-800 text-sm">{img.file.name}</p>

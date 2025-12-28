@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { ArrowLeft, Sparkles, Target, Heart, Info, X } from 'lucide-react';
 const oshiyaAvatar = "/assets/8987b8bb591c6b85bd934a46b81596f6b40dd7d7.png";
 
@@ -35,9 +36,11 @@ export function AboutPage({ onClose, onNavigateToWhat, isDesktop = false }: Abou
         {/* Avatar section */}
         <div className="flex justify-center mb-8">
           <div className="relative">
-            <img
+            <Image
               src={oshiyaAvatar}
               alt="רעות - מייסדת Oshiya"
+              width={160}
+              height={160}
               className="w-40 h-40 rounded-full object-cover border-4 border-purple-300"
             />
             <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-4 border-white flex items-center justify-center">
@@ -51,14 +54,33 @@ export function AboutPage({ onClose, onNavigateToWhat, isDesktop = false }: Abou
           <h1 className="text-2xl font-bold text-gray-900 text-right mb-4">מי אני</h1>
           <div className="space-y-4 text-gray-700 leading-relaxed">
             <p>
-              היי! אני רעות, מכורה לקניות ורודפת מבצעים.<br />
-              כשאני לא במרדף, אני עובדת אצל שני המנהלים שלי – בני 3 ו־5.<br />
+              היי! אני רעות – מכורה לקניות, עם פשן לפיסים והחולשה להזדמנויות.<br />
+              כשאני לא עסוקה בלפוצץ עגלות, אני עובדת אצל שני המנהלים שלי – בני 3 ו־5.<br />
               מצד אחד זה לא פשוט, מצד שני זה מרחיב משמעותית את מעגל השופינג. כבר יתרון.
             </p>
 
             <p>
               המשפט שאני הכי אוהבת?<br />
               <span className="text-xl">"אמא, תקני לי."</span>
+            </p>
+
+            <p>
+              ואם כבר מדברות על "תקני לי" – אז אני מאלה שעוצרים ברחוב ושואלים:<br />
+              "איפה קנית את זה?"
+            </p>
+
+            <p>
+              כי מעבר לזה שאני רודפת אחרי הזדמנויות,<br />
+              יש לי גם עין מטורפת לסטייל.<br />
+              לא למדתי את זה, לא עשיתי מזה קריירה (עד עכשיו), אבל זה תמיד היה שם.<br />
+              כל מקום שאני נכנסת אליו – אני בולטת.<br />
+              לא כי אני מנסה – פשוט ככה אני מתלבשת.
+            </p>
+
+            <p>
+              אני משלבת דברים שאף אחת לא תחשוב עליהם,<br />
+              חופרת עד שאני מוצאת את הפיס המדויק,<br />
+              ויש לי קטע עם לראות מישהי – ולהבין מה בא לה לשדר, עוד לפני שהיא יודעת.
             </p>
 
             <p>
@@ -77,13 +99,20 @@ export function AboutPage({ onClose, onNavigateToWhat, isDesktop = false }: Abou
             </p>
 
             <p>
+              ובאיזשהו שלב, זה התחבר לי יחד:<br />
+              מצד אחד – האובסס לשופינג חכם.<br />
+              מצד שני – היכולת להרכיב לוקים שאנשים עוצרים אותי ברחוב בגללם.<br />
+              וזה מה שהפך ל־אושייה.
+            </p>
+
+            <p>
               אחרי הרבה שנים בהייטק, כמנהלת מחלקות עיצוב מוצר, החלטתי להקים משהו משלי.<br />
-              עברתי כמה ניסיונות וכיוונים, ובסוף – בלי יותר מדי כסף (כי ביטוח לאומי לא בדיוק לארג'ץ) – הבנתי שיש פה בעיה אישית שצריך לפתור.
+              עברתי כמה ניסיונות וכיוונים, ובסוף – בלי יותר מדי כסף (כי ביטוח לאומי לא בדיוק לארג') – הבנתי שיש פה בעיה אישית שצריך לפתור.
             </p>
 
             <p>
               מצד אחד – הכסף מנהל אותי.<br />
-              מצד שני  צריך לחסוך בעלויות (בכל זאת, תקופת אבטלה).
+              מצד שני צריך לחסוך בעלויות (בכל זאת, תקופת אבטלה).
             </p>
 
             <p className="font-medium text-gray-800">
@@ -91,18 +120,18 @@ export function AboutPage({ onClose, onNavigateToWhat, isDesktop = false }: Abou
             </p>
 
             <div className="space-y-3 mr-4">
-              <p>ללכת ליועץ פיננסי שיסדר את הכסף שאין לי</p>
-              <p>או פשוט להתחיל לעשות שופינג חכם</p>
+              <p>ללכת ליועץ פיננסי שיסדר את הכסף שאין לי,</p>
+              <p>או פשוט להתחיל לעשות שופינג חכם.</p>
             </div>
 
             <p className="text-purple-700 font-medium">
-              נחשו במה בחרתי? 😉<br />
-              וככה הקמתי את אושייה.
+              נחשו במה בחרתי? 😉
             </p>
 
             <p>
+              וככה הקמתי את אושייה.<br />
               כמובן שבאישור שני המנהלים שלי, שתמכו וחיזקו את המהלך –<br />
-              אבל שזה לא יבוא על חשבון הגדרת התפקיד שהם נתנו לי כאמא בחברה שלהם
+              אבל שזה לא יבוא על חשבון הגדרת התפקיד שהם נתנו לי כאמא בחברה שלהם.
             </p>
           </div>
 

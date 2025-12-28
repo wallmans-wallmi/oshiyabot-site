@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { ArrowRight, Sparkles, X } from 'lucide-react';
 const howImage = "/assets/9da14f689d0aad6e5536fd64386b0685a4bf8bb0.png";
 
@@ -9,7 +10,7 @@ interface HowPageProps {
 
 export function HowPage({ onBack, isDesktop = false }: HowPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50" dir="rtl">
+    <div className={`${isDesktop ? 'h-full' : 'fixed inset-0 z-50'} bg-gradient-to-br from-purple-50 to-pink-50 overflow-y-auto`} dir="rtl">
       {/* Header */}
       {!isDesktop && (
         <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">
@@ -30,13 +31,15 @@ export function HowPage({ onBack, isDesktop = false }: HowPageProps) {
       )}
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Avatar section */}
         <div className="flex justify-center mb-8">
           <div className="relative">
-            <img
+            <Image
               src={howImage}
               alt="איך אושייה עובדת"
+              width={160}
+              height={160}
               className="w-40 h-40 rounded-full object-cover border-4 border-purple-300"
             />
             <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-4 border-white flex items-center justify-center">
@@ -45,40 +48,65 @@ export function HowPage({ onBack, isDesktop = false }: HowPageProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 space-y-6">
+        <div className="bg-white rounded-3xl p-6 md:p-8 space-y-6">
           <h1 className="text-2xl font-bold text-gray-900 text-right mb-4">איך אני עובדת</h1>
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. את זורקת לי מה את רוצה</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 1 – מתחילות מסטייל</h2>
             <p className="text-gray-700 leading-relaxed">
-              זה יכול להיות דגם, לינק, תמונה מהאינסטה – מה שנוח לך. העיקר שאני אבין בדיוק על מה את מדברת, כדי שלא אתחיל לעקוב אחרי משהו ש"בערך דומה".
+              את זורקת לי וייב:<br />
+              מה את מחפשת, לאיזה סיטואציה, מה הסגנון שלך, מה התקציב.<br />
+              אפשר גם תמונה, השראה מהפינטרסט, או "אין לי מושג, אבל בא לי משהו מיוחד".
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. אני שמה עליו עין</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 2 – בונות לוק</h2>
             <p className="text-gray-700 leading-relaxed">
-              מאותו רגע אני בעסק – חופרת באתרי קניות מוכרים (לא איזה חור נידח), משווה מחירים, ובודקת אם מישהו במקרה הוריד מחיר. בקיצור, אני בודקת בשבילך כדי שלא תצטרכי לעשות רפרש 20 פעם ביום.
+              אני עוזרת לך לדייק את הסגנון – מה בא לך לשדר, מה נוח לך, מה ירגיש לך הכי את.<br />
+              כמו סטייליסטית שהיא גם חברה שלך – לא מישהי שמנסה להלביש אותך בתחפושת.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. אני לא מציקה – רק מודיעה כשיש קטע</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 3 – מוצאות את הפריטים</h2>
             <p className="text-gray-700 leading-relaxed">
-              אם יש ירידת מחיר שבאמת שווה – תקבלי פינג בוואטסאפ. לא ספאם, לא "החגיגות החלו!" של איזה אתר. רק כשזה באמת מרגיש כמו "טוב, שווה לעצור רגע ולחשוב אם לקנות".
+              אני מחפשת פריטים אונליין שמתאימים ללוק שבנינו –<br />
+              גם לפי מה שמתאים לך, וגם לפי התקציב.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. ההחלטה שלך</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 4 – את בוחרת את הקצב</h2>
             <p className="text-gray-700 leading-relaxed">
-              אני לא בקטע של לדחוף. את לא הולכת לשמוע ממני "עוד רגע נגמר המלאי!!!". את מחליטה אם לקנות או לא, בקצב שלך, בלי לחץ, בלי רגשות אשם ובלי מבצעים שנגמרים עוד 3... 2... 1...
+              אם יש לך אירוע דחוף – נרכיב סל וקונים.<br />
+              אם לא בוער – נכניס את הפריטים למעקב.
             </p>
           </section>
 
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-sm text-gray-600 text-center">
-              כי בשביל מה יש אושייה אם לא בשביל העבודה השחורה?
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 5 – כשיש ירידת מחיר אמיתית, את מקבלת התראה</h2>
+            <p className="text-gray-700 leading-relaxed">
+              בלי ספאם. בלי "החגיגות החלו".<br />
+              רק כשזה באמת מרגיש שווה.
             </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 6 – את מחליטה</h2>
+            <p className="text-gray-700 leading-relaxed">
+              אני לא דוחפת. לא מלחיצה. לא יוצרת FOMO.<br />
+              רק שולחת את מה שבאמת משתלם – ואת בוחרת אם בא לך או לא.
+            </p>
+          </section>
+
+          {/* Call to action */}
+          <div className="pt-6 mt-6 border-t-2 border-gray-100">
+            <button
+              onClick={onBack}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+            >
+              בואי נתחיל »
+            </button>
           </div>
         </div>
       </div>

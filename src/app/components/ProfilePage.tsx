@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
-import { ArrowRight, User, Edit2, Plus, X, Crown, Calendar, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, User, Edit2, Plus, X, Crown, Calendar, TrendingUp, LogOut } from 'lucide-react';
+import { LogoutConfirmDialog } from './LogoutConfirmDialog';
 
 interface ProfilePageProps {
   onBack: () => void;
   firstName?: string;
   phoneNumber?: string;
+  gender?: 'male' | 'female';
   onEditPhone?: () => void;
   onUpdateName?: (newName: string) => void;
   onUpdatePhone?: (newPhone: string) => void;
+  onUpdateGender?: (gender: 'male' | 'female' | null) => void;
+  isLoggedIn?: boolean;
+  onLogin?: () => void;
+  onLogout?: () => void;
   isDesktop?: boolean;
   // Subscription props
   isPremium?: boolean;
@@ -18,15 +24,22 @@ interface ProfilePageProps {
   onManageSubscription?: () => void;
   onSwitchPlan?: (newPlan: 'monthly' | 'yearly') => void;
   onCancelSubscription?: () => void;
+  // Feature flag to hide premium features
+  enablePremium?: boolean;
 }
 
 export function ProfilePage({ 
   onBack, 
   firstName, 
   phoneNumber,
+  gender,
   onEditPhone,
   onUpdateName,
   onUpdatePhone,
+  onUpdateGender,
+  isLoggedIn = false,
+  onLogin,
+  onLogout,
   isDesktop = false,
   // Subscription props
   isPremium = false,
@@ -36,14 +49,25 @@ export function ProfilePage({
   onUpgradeToPremium,
   onManageSubscription,
   onSwitchPlan,
-  onCancelSubscription
+  onCancelSubscription,
+  enablePremium = true
 }: ProfilePageProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(firstName || '');
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [editedPhone, setEditedPhone] = useState(phoneNumber || '');
+  const [isEditingGender, setIsEditingGender] = useState(false);
+  const [editedGender, setEditedGender] = useState<'male' | 'female' | null>(gender || null);
   const [renewalReminderEnabled, setRenewalReminderEnabled] = useState(true);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  // Sync editedGender when gender prop changes (when not editing)
+  useEffect(() => {
+    if (!isEditingGender) {
+      setEditedGender(gender || null);
+    }
+  }, [gender, isEditingGender]);
 
   const handleSaveName = () => {
     if (editedName.trim() && onUpdateName) {
@@ -57,6 +81,47 @@ export function ProfilePage({
       onUpdatePhone(editedPhone.trim());
     }
     setIsEditingPhone(false);
+  };
+
+  const handleSaveGender = () => {
+    if (onUpdateGender) {
+      onUpdateGender(editedGender);
+    }
+    setIsEditingGender(false);
+  };
+
+  // Custom Radio Button Component (reused from SettingsPage pattern)
+  const RadioButton = ({ id, name, value, checked, onChange, label }: {
+    id: string;
+    name: string;
+    value: 'male' | 'female';
+    checked: boolean;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+  }) => {
+    return (
+      <label className="flex items-start cursor-pointer group py-3">
+        <div className="relative flex items-center ml-4 mt-0.5">
+          <input
+            type="radio"
+            id={id}
+            name={name}
+            value={value}
+            checked={checked}
+            onChange={onChange}
+            className="sr-only"
+          />
+          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
+            checked ? 'border-purple-600 bg-white' : 'border-gray-400 bg-white'
+          }`}>
+            {checked && (
+              <div className="w-2 h-2 rounded-full bg-purple-600" />
+            )}
+          </div>
+        </div>
+        <span className={`${checked ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>{label}</span>
+      </label>
+    );
   };
 
   return (
@@ -211,6 +276,80 @@ export function ProfilePage({
                 </p>
               )}
             </div>
+
+            {/* Gender Field */}
+            <div className="bg-white rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="font-semibold text-gray-900">איך לפנות אליך</h3>
+                  <p className="text-xs text-gray-500 mt-1">רק כדי שאדע אם לפנות אליך בלשון זכר או נקבה</p>
+                </div>
+                {!isEditingGender && (
+                  <button
+                    onClick={() => {
+                      setIsEditingGender(true);
+                      setEditedGender(gender || null);
+                    }}
+                    className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
+                  >
+                    {gender ? (
+                      <>
+                        <Edit2 className="w-4 h-4" />
+                        <span className="text-sm">ערוך</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        <span className="text-sm">הוסף</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+              {isEditingGender ? (
+                <div className="space-y-3">
+                  <div className="space-y-0">
+                    <RadioButton
+                      id="gender-male"
+                      name="gender"
+                      value="male"
+                      checked={editedGender === 'male'}
+                      onChange={(e) => setEditedGender(e.target.value as 'male')}
+                      label="גבר"
+                    />
+                    <RadioButton
+                      id="gender-female"
+                      name="gender"
+                      value="female"
+                      checked={editedGender === 'female'}
+                      onChange={(e) => setEditedGender(e.target.value as 'female')}
+                      label="אישה"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveGender}
+                      className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      שמור
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditedGender(gender || null);
+                        setIsEditingGender(false);
+                      }}
+                      className="flex-1 border-2 border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      ביטול
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-600 text-lg font-normal">
+                  {gender === 'male' ? 'גבר' : gender === 'female' ? 'אישה' : 'לא הוגדר'}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Info Card */}
@@ -222,8 +361,9 @@ export function ProfilePage({
           </div>
 
           {/* Subscription Section */}
-          <div className="mt-8 space-y-4">
-            <h3 className="font-semibold text-gray-900 text-lg">המנוי שלי</h3>
+          {enablePremium && (
+            <div className="mt-8 space-y-4">
+              <h3 className="font-semibold text-gray-900 text-lg">המנוי שלי</h3>
 
             {/* Subscription Card */}
             <div className="bg-white rounded-2xl p-5">
@@ -387,8 +527,42 @@ export function ProfilePage({
               )}
             </div>
           </div>
+          )}
+
+          {/* Login/Logout Button */}
+          <div className="mt-6">
+            {isLoggedIn ? (
+              <button
+                onClick={() => setShowLogoutDialog(true)}
+                className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-2xl active:bg-gray-50 active:border-gray-400 transition-all"
+                style={{ minHeight: '44px' }}
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium">התנתקות</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => onLogin?.()}
+                className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-2xl active:bg-gray-50 active:border-gray-400 transition-all"
+                style={{ minHeight: '44px' }}
+              >
+                <span className="font-medium">התחברות</span>
+                <User className="w-5 h-5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Logout confirmation dialog */}
+      <LogoutConfirmDialog 
+        isOpen={showLogoutDialog}
+        onConfirm={() => {
+          setShowLogoutDialog(false);
+          onLogout?.();
+        }}
+        onCancel={() => setShowLogoutDialog(false)}
+      />
     </div>
   );
 }

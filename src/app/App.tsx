@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Sparkles, Tag, Send, TrendingDown, Bell, Info, Menu, X, Image as ImageIcon, ExternalLink, MessageCircle, Settings, EllipsisVertical, Pause, Trash2, Pencil, ChevronDown, User, Eye, Shield, Cookie, Scale } from 'lucide-react';
 
 // Extend Window interface for console navigation helper
@@ -11,6 +12,10 @@ declare global {
 }
 
 const oshiyaAvatar = "/assets/ea9d3f873ca76c584ffa18ac5550589db242a0e0.png";
+
+// Feature flag: Set to false to temporarily hide all Premium/Subscription features
+const ENABLE_PREMIUM = false;
+
 import { AboutPage } from './components/AboutPage';
 import { WhatPage } from './components/WhatPage';
 import { HowPage } from './components/HowPage';
@@ -22,6 +27,7 @@ import { AccessibilityStatementPage } from './components/AccessibilityStatementP
 import { ContactPage } from './components/ContactPage';
 import { ProfilePage } from './components/ProfilePage';
 import { TrackingsPage } from './components/TrackingsPage';
+import { LooksPage } from './components/LooksPage';
 import { AccessibilityButton } from './components/AccessibilityButton';
 import { AccessibilityMenu } from './components/AccessibilityMenu';
 import { ImageUploaderDemo } from './components/ImageUploaderDemo';
@@ -48,6 +54,7 @@ interface Message {
   timestamp: Date;
   showAfterDelay?: number;
   source?: 'script' | 'ai' | 'user'; // Distinguish between scripted, AI-generated, and user messages
+  canSaveToLooks?: boolean; // Whether this message represents a look that can be saved
 }
 
 interface QuickReply {
@@ -79,6 +86,7 @@ interface ConversationState {
     budget?: string;
     phone?: string;
     firstName?: string;
+    gender?: 'male' | 'female';
     target_type?: 'target_price' | 'percent_drop';
     target_value?: number;
   };
@@ -106,16 +114,26 @@ export interface Deal {
   imageUrl?: string; // Optional image URL for the product (used by TrackingsPage)
 }
 
+export interface Look {
+  id: number;
+  title: string; // Event / daily / inspiration context
+  previewImage?: string;
+  createdAt: Date;
+  items?: string[]; // Optional list of items in the look
+  sourceChatMessageId?: number; // Optional reference to the chat message
+}
+
 export default function App() {
   const [message, setMessage] = useState('');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'chat' | 'deals'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'looks' | 'deals'>('chat');
   const [isTabsCollapsed, setIsTabsCollapsed] = useState(false);
   const [conversationState, setConversationState] = useState<ConversationState>({
     path: 'initial',
     step: 0,
     productData: {},
   });
+  const [looks, setLooks] = useState<Look[]>([]);
   const [deals, setDeals] = useState<Deal[]>([
     {
       id: 1,
@@ -420,7 +438,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [otpPhone, setOtpPhone] = useState('');
   const [shouldShowWelcomeBack, setShouldShowWelcomeBack] = useState(false);
-  const [otpReturnPage, setOtpReturnPage] = useState<'chat' | 'account'>('chat');
+  const [otpReturnPage, setOtpReturnPage] = useState<'chat' | 'account' | 'profile'>('chat');
   const [hasShownLoginSuggestion, setHasShownLoginSuggestion] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -477,7 +495,7 @@ export default function App() {
         return (allowedPages as readonly string[]).includes(p);
       };
       if (isValidPage(page)) {
-        setCurrentPage(page);
+      setCurrentPage(page);
       } else {
         console.warn(`Invalid page: ${page}. Allowed pages:`, allowedPages);
       }
@@ -502,10 +520,10 @@ export default function App() {
         const parsedState = JSON.parse(savedConversationState);
         
         // Restore messages with Date objects
-        const restoredMessages = parsedMessages.map((msg: any) => ({
+        const restoredMessages = (parsedMessages as Array<Omit<Message, 'timestamp'> & { timestamp: string }>).map((msg) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
-        }));
+        })) as Message[];
         
         setMessages(restoredMessages);
         setConversationState(parsedState);
@@ -746,9 +764,9 @@ export default function App() {
         const hasLink = urlRegex.test(messageContent);
         const link = hasLink ? messageContent.match(urlRegex)?.[0] : undefined;
         
-        setConversationState(prev => ({
-          ...prev,
-          step: 3,
+      setConversationState(prev => ({
+        ...prev,
+        step: 3,
           productData: { 
             ...prev.productData, 
             name: messageContent, 
@@ -991,9 +1009,9 @@ export default function App() {
                 ),
                 content: '',
                 source: 'script',
-                timestamp: new Date(),
-              }]);
-              setIsTyping(false);
+            timestamp: new Date(),
+          }]);
+          setIsTyping(false);
             }, 800);
           }, 500);
         }, 800);
@@ -1052,9 +1070,9 @@ export default function App() {
               ),
               content: '',
               source: 'script',
-              timestamp: new Date(),
-            }]);
-            setIsTyping(false);
+          timestamp: new Date(),
+        }]);
+        setIsTyping(false);
           }, 800);
         }, 500);
       }, 800);
@@ -1426,18 +1444,18 @@ export default function App() {
           const aiContent = data.choices?.[0]?.message?.content || 'הכי מעניין! בואי נעזור לך להבין מה שווה לך לבדוק בכלל – ואז נתקדם למעקב.';
           
           setIsTyping(false);
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              id: Date.now() + 1,
-              type: 'assistant',
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: Date.now() + 1,
+          type: 'assistant',
               content: aiContent,
               source: 'ai',
-              timestamp: new Date(),
-            }]);
+          timestamp: new Date(),
+        }]);
           }, 800);
         } catch (error) {
           console.error('Error calling AI API:', error);
-          setIsTyping(false);
+        setIsTyping(false);
           // Fallback to scripted message on error
           setTimeout(() => {
             setMessages(prev => [...prev, {
@@ -1447,7 +1465,7 @@ export default function App() {
               source: 'script',
               timestamp: new Date(),
             }]);
-          }, 800);
+      }, 800);
         }
       };
       
@@ -1578,9 +1596,9 @@ export default function App() {
               ),
               content: '',
               source: 'script',
-              timestamp: new Date(),
-            }]);
-            setIsTyping(false);
+          timestamp: new Date(),
+        }]);
+        setIsTyping(false);
           }, 800);
         }, 500);
       }, 800);
@@ -1726,9 +1744,9 @@ export default function App() {
                   
                   // Show errors if any
                   if (errors.length > 0) {
-                    setMessages(prev => [...prev, {
+            setMessages(prev => [...prev, {
                       id: Date.now(),
-                      type: 'assistant',
+              type: 'assistant',
                       contentJSX: (
                         <div>
                           <p className="mb-2 font-medium">יש כמה דברים לתקן:</p>
@@ -1779,9 +1797,9 @@ export default function App() {
                               }
                               
                               if (retryErrors.length > 0) {
-                                setMessages(prev => [...prev, {
+                setMessages(prev => [...prev, {
                                   id: Date.now(),
-                                  type: 'assistant',
+                  type: 'assistant',
                                   contentJSX: (
                                     <div>
                                       <p className="mb-2 font-medium">יש כמה דברים לתקן:</p>
@@ -2223,9 +2241,9 @@ export default function App() {
               }
               
               // Store in conversation state
-              setConversationState(prev => ({
-                ...prev,
-                step: 6,
+          setConversationState(prev => ({ 
+            ...prev, 
+            step: 6, 
                 productData: {
                   ...prev.productData,
                   priceTarget: targetValue.toString(),
@@ -2246,45 +2264,45 @@ export default function App() {
                 }]);
                 
                 // Check if user is identified (has phone number)
-                const hasPhone = conversationState.productData.phone;
-                
+          const hasPhone = conversationState.productData.phone;
+          
                 setTimeout(() => {
-                  if (!hasPhone) {
-                    // Ask for WhatsApp phone number
+          if (!hasPhone) {
+            // Ask for WhatsApp phone number
                     setIsTyping(true);
                     setTimeout(() => {
-                      setMessages(prev => [...prev, {
+            setMessages(prev => [...prev, {
                         id: Date.now() + 2,
-                        type: 'assistant',
-                        contentJSX: (
-                          <div>
-                            <p className="mb-2">לאיזה מספר לשלוח לך וואטסאפ כשיש ירידת מחיר?</p>
-                            <InlineInputs
-                              inputs={[
-                                { 
-                                  id: 'phone', 
-                                  type: 'tel', 
-                                  placeholder: 'מספר טלפון (לדוגמה: 0501234567)',
-                                  inputMode: 'tel'
-                                }
-                              ]}
-                              submitLabel="סגור, שלחי"
-                              onSubmit={(phoneValues) => {
-                                handleQuickReply(`phone-submit:${phoneValues.phone}`);
-                              }}
-                            />
-                          </div>
-                        ),
-                        content: '',
+              type: 'assistant',
+              contentJSX: (
+                <div>
+                  <p className="mb-2">לאיזה מספר לשלוח לך וואטסאפ כשיש ירידת מחיר?</p>
+                  <InlineInputs
+                    inputs={[
+                      { 
+                        id: 'phone', 
+                        type: 'tel', 
+                        placeholder: 'מספר טלפון (לדוגמה: 0501234567)',
+                        inputMode: 'tel'
+                      }
+                    ]}
+                    submitLabel="סגור, שלחי"
+                    onSubmit={(phoneValues) => {
+                      handleQuickReply(`phone-submit:${phoneValues.phone}`);
+                    }}
+                  />
+                </div>
+              ),
+              content: '',
                         source: 'script',
-                        timestamp: new Date(),
-                      }]);
+              timestamp: new Date(),
+            }]);
                       setIsTyping(false);
                     }, 800);
-                  } else {
-                    // User already identified, show confirmation
-                    handleQuickReply('show-tracking-confirmation');
-                  }
+          } else {
+            // User already identified, show confirmation
+            handleQuickReply('show-tracking-confirmation');
+          }
                 }, 1000);
               }, 800);
             } catch (error) {
@@ -2342,8 +2360,8 @@ export default function App() {
                       source: 'script',
                       timestamp: new Date(),
                     }]);
-                    setIsTyping(false);
-                  }, 800);
+        setIsTyping(false);
+      }, 800);
                 }, 500);
               } else {
                 handleQuickReply('show-tracking-confirmation');
@@ -2511,8 +2529,8 @@ export default function App() {
           setTimeout(() => {
             setIsTyping(true);
             setTimeout(() => {
-              // Check if user has reached the 3 tracking limit
-              if (newCount >= 3) {
+              // Check if user has reached the 3 tracking limit (only if premium is enabled)
+              if (ENABLE_PREMIUM && newCount >= 3) {
                 // Show premium limit message
                 setMessages(prev => [...prev, {
                   id: Date.now() + 10,
@@ -2636,8 +2654,8 @@ export default function App() {
           setTimeout(() => {
             setIsTyping(true);
             setTimeout(() => {
-              // Check if user has reached the 3 tracking limit
-              if (newCount2 >= 3) {
+              // Check if user has reached the 3 tracking limit (only if premium is enabled)
+              if (ENABLE_PREMIUM && newCount2 >= 3) {
                 // Show premium limit message
                 setMessages(prev => [...prev, {
                   id: Date.now() + 2,
@@ -2762,8 +2780,8 @@ export default function App() {
       // The suggestion won't show again this session
     }
 
-    // Premium - Not Now
-    else if (value === 'premium-not-now') {
+    // Premium - Not Now (disabled if premium is off)
+    else if (ENABLE_PREMIUM && value === 'premium-not-now') {
       const userMessage: Message = {
         id: Date.now(),
         type: 'user',
@@ -2785,8 +2803,8 @@ export default function App() {
       }, 800);
     }
 
-    // Premium - Monthly
-    else if (value === 'premium-monthly') {
+    // Premium - Monthly (disabled if premium is off)
+    else if (ENABLE_PREMIUM && value === 'premium-monthly') {
       const userMessage: Message = {
         id: Date.now(),
         type: 'user',
@@ -2839,8 +2857,8 @@ export default function App() {
       }, 800);
     }
 
-    // Premium - Yearly
-    else if (value === 'premium-yearly') {
+    // Premium - Yearly (disabled if premium is off)
+    else if (ENABLE_PREMIUM && value === 'premium-yearly') {
       const userMessage: Message = {
         id: Date.now(),
         type: 'user',
@@ -2893,14 +2911,14 @@ export default function App() {
       }, 800);
     }
 
-    // Proceed to payment - Monthly
-    else if (value === 'proceed-to-payment-monthly') {
+    // Proceed to payment - Monthly (disabled if premium is off)
+    else if (ENABLE_PREMIUM && value === 'proceed-to-payment-monthly') {
       setSelectedPremiumPlan('monthly');
       setCurrentPage('payment');
     }
 
-    // Proceed to payment - Yearly
-    else if (value === 'proceed-to-payment-yearly') {
+    // Proceed to payment - Yearly (disabled if premium is off)
+    else if (ENABLE_PREMIUM && value === 'proceed-to-payment-yearly') {
       setSelectedPremiumPlan('yearly');
       setCurrentPage('payment');
     }
@@ -2920,7 +2938,7 @@ export default function App() {
     }
   };
 
-  const handleTabChange = (tab: 'chat' | 'deals') => {
+  const handleTabChange = (tab: 'chat' | 'looks' | 'deals') => {
     setActiveTab(tab);
     if (tab === 'deals') {
       // Mark all deals as read
@@ -3060,6 +3078,23 @@ export default function App() {
           onBack={() => setCurrentPage('chat')}
           firstName={conversationState.productData.firstName}
           phoneNumber={conversationState.productData.phone}
+          gender={conversationState.productData.gender}
+          isLoggedIn={isLoggedIn}
+          onLogin={() => {
+            setOtpReturnPage('profile');
+            setCurrentPage('login');
+          }}
+          onLogout={() => {
+            setIsLoggedIn(false);
+            setCurrentPage('chat');
+            const logoutMessage: Message = {
+              id: messages.length + 1,
+              type: 'assistant',
+              content: 'נותקנו 🙂\nכשתרצי לחזור – אני פה.',
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, logoutMessage]);
+          }}
           onUpdateName={(newName) => {
             setConversationState(prev => ({
               ...prev,
@@ -3072,7 +3107,13 @@ export default function App() {
               productData: { ...prev.productData, phone: newPhone }
             }));
           }}
-          onUpgradeToPremium={() => setCurrentPage('premium-selection')}
+          onUpdateGender={(gender) => {
+            setConversationState(prev => ({
+              ...prev,
+              productData: { ...prev.productData, gender: gender || undefined }
+            }));
+          }}
+          onUpgradeToPremium={ENABLE_PREMIUM ? () => setCurrentPage('premium-selection') : undefined}
           isPremium={isPremiumUser}
           subscriptionType={selectedPremiumPlan || undefined}
           renewalDate={
@@ -3095,6 +3136,7 @@ export default function App() {
             setPremiumStartDate(null);
           }}
           isDesktop={isDesktop}
+          enablePremium={ENABLE_PREMIUM}
         />
       )}
       {!isDesktop && currentPage === 'trackings' && (
@@ -3123,7 +3165,15 @@ export default function App() {
       {currentPage === 'otp' && (
         <OTPVerification
           phoneNumber={otpPhone}
-          onClose={() => setCurrentPage(otpReturnPage === 'account' ? 'account' : 'login')}
+          onClose={() => {
+            if (otpReturnPage === 'account') {
+              setCurrentPage('account');
+            } else if (otpReturnPage === 'profile') {
+              setCurrentPage('profile');
+            } else {
+              setCurrentPage('login');
+            }
+          }}
           onVerify={(code) => {
             // Check if user has existing conversation
             const hasExistingConversation = messages.length > 2;
@@ -3136,7 +3186,11 @@ export default function App() {
             }
             
             // Return to the page that initiated OTP
-            setCurrentPage(otpReturnPage);
+            if (otpReturnPage === 'account' || otpReturnPage === 'profile') {
+              setCurrentPage(otpReturnPage);
+            } else {
+              setCurrentPage('chat');
+            }
             // Reset for next time
             setOtpReturnPage('chat');
           }}
@@ -3152,6 +3206,11 @@ export default function App() {
           firstName={conversationState.productData.firstName}
           phoneNumber={otpPhone}
           isDesktop={isDesktop}
+          isLoggedIn={isLoggedIn}
+          onLogin={() => {
+            setOtpReturnPage('account');
+            setCurrentPage('login');
+          }}
           onLogout={() => {
             setIsLoggedIn(false);
             setCurrentPage('chat');
@@ -3197,7 +3256,7 @@ export default function App() {
         />
       )}
 
-      {currentPage === 'payment' && selectedPremiumPlan && (
+      {ENABLE_PREMIUM && currentPage === 'payment' && selectedPremiumPlan && (
         <PaymentPage 
           plan={selectedPremiumPlan}
           onBack={() => setCurrentPage('premium-selection')}
@@ -3224,7 +3283,7 @@ export default function App() {
         />
       )}
 
-      {currentPage === 'premium-selection' && (
+      {ENABLE_PREMIUM && currentPage === 'premium-selection' && (
         <PremiumSelectionPage 
           onBack={() => setCurrentPage('profile')}
           onContinueToPayment={(plan) => {
@@ -3246,9 +3305,11 @@ export default function App() {
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
             <div className="relative">
-              <img
+              <Image
                 src={oshiyaAvatar}
                 alt="אושייה"
+                width={56}
+                height={56}
                 className="w-14 h-14 rounded-full object-cover object-center border-2 border-purple-300"
               />
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
@@ -3277,14 +3338,13 @@ export default function App() {
             </button>
 
             {/* האזור שלי - דרופדאון */}
-            {isLoggedIn && (
               <div 
                 className="relative dropdown-container"
               >
                 <button 
                   onClick={() => setOpenDropdown(openDropdown === 'myArea' ? null : 'myArea')}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                    currentPage === 'account' || currentPage === 'settings' || currentPage === 'profile'
+                  currentPage === 'account' || currentPage === 'settings' || currentPage === 'profile' || currentPage === 'login'
                       ? 'text-purple-700 bg-purple-50' 
                       : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
                   }`}
@@ -3296,6 +3356,8 @@ export default function App() {
                 
                 {openDropdown === 'myArea' && (
                   <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  {isLoggedIn ? (
+                    <>
                     <button
                       onClick={() => {
                         setCurrentPage('profile');
@@ -3327,10 +3389,21 @@ export default function App() {
                       <Settings className="w-4 h-4" />
                       <span>ההגדרות שלי</span>
                     </button>
-                  </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setCurrentPage('login');
+                        setOpenDropdown(null);
+                      }}
+                      className="w-full text-right px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center gap-2"
+                    >
+                      <span>התחברות</span>
+                    </button>
                 )}
               </div>
             )}
+            </div>
 
             {/* אושייה - דרופדאון */}
             <div 
@@ -3509,9 +3582,11 @@ export default function App() {
               {/* Menu header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <img
+                  <Image
                     src={oshiyaAvatar}
                     alt="Oshiya"
+                    width={40}
+                    height={40}
                     className="w-12 h-12 rounded-full object-cover border-2 border-gray-300"
                   />
                   <div>
@@ -3706,45 +3781,79 @@ export default function App() {
         )}
 
         <div className="max-w-3xl mx-auto">
-          {/* Sticky header wrapper for Trackings page */}
-          {activeTab === 'deals' && deals.length > 0 && (
-            <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 -mx-4 z-10">
-              {/* Primary tabs */}
-              <div className="px-4 pt-1 pb-1">
-                <div className={`bg-white/95 backdrop-blur-sm rounded-full border border-gray-200 transition-all duration-300 ${
-                  isTabsCollapsed 
-                    ? 'p-0.5' 
-                    : 'p-1'
-                }`}>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleTabChange('chat')}
-                      className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative ${
-                        isTabsCollapsed ? 'px-3 py-1.5' : 'px-4 py-2'
-                      } text-gray-500 hover:bg-gray-50`}
-                      aria-label="לחזור לצ'אט"
-                    >
-                      צ׳אט
-                    </button>
-                    <button
-                      onClick={() => handleTabChange('deals')}
-                      className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none ${
-                        isTabsCollapsed ? 'px-3 py-1.5' : 'px-4 py-2'
-                      } ${
-                        activeTab === 'deals'
-                          ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                          : 'text-gray-500 hover:bg-gray-50'
-                      }`}
-                      aria-label="לראות את המעקבים שלך"
-                    >
-                      המעקבים שלי
-                    </button>
-                  </div>
-                </div>
+          {/* Unified Tabs Bar - Always visible for all tabs */}
+          <div 
+            className={`sticky top-0 -mx-4 px-4 z-10 transition-all duration-300 ease-out mb-4 ${
+              isTabsCollapsed 
+                ? 'pt-1 pb-1' 
+                : 'pt-1 pb-1'
+            }`}
+          >
+            <div className={`bg-white/95 backdrop-blur-sm rounded-full border border-gray-200 transition-all duration-300 ${
+              isTabsCollapsed 
+                ? 'p-0.5' 
+                : 'p-1'
+            }`}
+            >
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleTabChange('chat')}
+                  className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative whitespace-nowrap ${
+                    isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                  } ${
+                    activeTab === 'chat'
+                      ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                  aria-label="לחזור לצ'אט"
+                >
+                  <span className="truncate block">צ׳אט</span>
+                </button>
+                <button
+                  onClick={() => handleTabChange('looks')}
+                  className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
+                    isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                  } ${
+                    activeTab === 'looks'
+                      ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                  aria-label="לראות את הלוקים שלי"
+                >
+                  <span className="truncate block md:inline">
+                    <span className="md:hidden">לוקים</span>
+                    <span className="hidden md:inline">הלוקים שלי</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleTabChange('deals')}
+                  className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none whitespace-nowrap ${
+                    isTabsCollapsed ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                  } ${
+                    activeTab === 'deals'
+                      ? 'text-[#2d2d2d] bg-gray-100 font-medium'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                  aria-label="לראות את המעקבים שלך"
+                >
+                  <span className="truncate block md:inline">
+                    <span className="md:hidden">מעקבים</span>
+                    <span className="hidden md:inline">המעקבים שלי</span>
+                  </span>
+                  {unreadDealsCount > 0 && activeTab === 'chat' && (
+                    <span className="absolute -top-1 -left-1 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" aria-label={`${unreadDealsCount} מבצעים חדשים`}>
+                      {unreadDealsCount}
+                    </span>
+                  )}
+                </button>
               </div>
+            </div>
+          </div>
 
-              {/* Filter tabs */}
-              <div className="px-4 border-b border-gray-200">
+          {/* Filter tabs - only for deals page */}
+          {activeTab === 'deals' && deals.length > 0 && (
+            <div className="sticky top-[56px] md:top-[64px] bg-gradient-to-br from-purple-50 to-pink-50 -mx-4 z-[9] border-b border-gray-200">
+              <div className="px-4">
                 <div className={`flex gap-6 justify-center transition-all duration-300 ${
                   dealsScrolled ? 'py-2 pb-2.5' : 'py-3 pb-3.5'
                 }`}>
@@ -3807,58 +3916,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Tabs - only shown for chat or empty deals state */}
-          {(activeTab === 'chat' || deals.length === 0) && (
-            <div 
-              className={`sticky top-0 -mx-4 px-4 z-10 transition-all duration-300 ease-out mb-4 ${
-                isTabsCollapsed 
-                  ? 'pt-1 pb-1' 
-                  : 'pt-1 pb-1'
-              }`}
-            >
-            <div className={`bg-white/95 backdrop-blur-sm rounded-full border border-gray-200 transition-all duration-300 ${
-              isTabsCollapsed 
-                ? 'p-0.5' 
-                : 'p-1'
-            }`}
-            >
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleTabChange('chat')}
-                className={`flex-1 rounded-full transition-all duration-200 focus:outline-none relative ${
-                  isTabsCollapsed ? 'px-3 py-1.5' : 'px-4 py-2'
-                } ${
-                  activeTab === 'chat'
-                    ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                    : 'text-gray-500 hover:bg-gray-50'
-                }`}
-                aria-label="לחזור לצ'אט"
-              >
-                צ׳אט
-              </button>
-              <button
-                onClick={() => handleTabChange('deals')}
-                className={`flex-1 rounded-full transition-all duration-200 relative focus:outline-none ${
-                  isTabsCollapsed ? 'px-3 py-1.5' : 'px-4 py-2'
-                } ${
-                  activeTab === 'deals'
-                    ? 'text-[#2d2d2d] bg-gray-100 font-medium'
-                    : 'text-gray-500 hover:bg-gray-50'
-                }`}
-                aria-label="לראות את המעקבים שלך"
-              >
-                המעקבים שלי
-                {unreadDealsCount > 0 && activeTab === 'chat' && (
-                  <span className="absolute -top-1 -left-1 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" aria-label={`${unreadDealsCount} מבצעים חדשים`}>
-                    {unreadDealsCount}
-                  </span>
-                )}
-              </button>
-            </div>
-            </div>
-          </div>
-          )}
-
           {/* Chat view */}
           {activeTab === 'chat' && (
             <div className="space-y-4">
@@ -3892,21 +3949,26 @@ export default function App() {
                     >
                     {msg.type === 'assistant' && (
                       <div className="flex-shrink-0">
-                        <img
+                        <Image
                           src={oshiyaAvatar}
                           alt="Oshiya"
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full object-cover"
                         />
                       </div>
                     )}
                     
-                    <div className={`max-w-[80%] ${msg.type === 'user' ? 'mr-10' : 'ml-10'}`}>
+                    <div className={`max-w-[80%] ${msg.type === 'user' ? 'ml-10' : 'mr-10'}`}>
                       {/* Image if exists */}
                       {msg.image && (
                         <div className="mb-2">
-                          <img
+                          <Image
                             src={msg.image}
                             alt="תמונה שהעלית"
+                            width={400}
+                            height={300}
+                            unoptimized
                             className={`rounded-2xl max-w-full h-auto max-h-64 object-contain shadow-md ${
                               msg.type === 'user' ? 'rounded-tr-sm' : 'rounded-tl-sm'
                             }`}
@@ -3928,6 +3990,57 @@ export default function App() {
                         )}
                       </div>
                       
+                      {/* Save to looks actions */}
+                      {msg.type === 'assistant' && msg.canSaveToLooks && (
+                        <div className="mt-3 space-y-2">
+                          <button
+                            onClick={() => {
+                              const lookTitle = msg.content.substring(0, 50) || 'לוק חדש';
+                              const newLook: Look = {
+                                id: Date.now(),
+                                title: lookTitle,
+                                previewImage: msg.image,
+                                createdAt: new Date(),
+                                sourceChatMessageId: msg.id,
+                              };
+                              setLooks(prev => [newLook, ...prev]);
+                              
+                              // Show confirmation message
+                              const confirmationMsg: Message = {
+                                id: Date.now() + 1,
+                                type: 'assistant',
+                                content: 'שמרתי את הלוק שלך! אפשר לראות אותו בלשונית "הלוקים שלי" ✨',
+                                timestamp: new Date(),
+                                source: 'script',
+                              };
+                              setMessages(prev => [...prev, confirmationMsg]);
+                            }}
+                            className="flex items-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
+                          >
+                            <span>שמור ללוקים שלי</span>
+                            <Sparkles className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Handle "Show another option" - could trigger AI to generate another look
+                              handleQuickReply('show-another-look-option');
+                            }}
+                            className="flex items-center gap-2 w-full bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
+                          >
+                            <span>הצגי אפשרות נוספת</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Handle "Refine this look" - could trigger AI to refine
+                              handleQuickReply('refine-this-look');
+                            }}
+                            className="flex items-center gap-2 w-full bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
+                          >
+                            <span>שפרי את הלוק הזה</span>
+                          </button>
+                        </div>
+                      )}
+                      
                       {/* Quick replies */}
                       {msg.type === 'assistant' && msg.quickReplies && index === messages.length - 1 && (
                         <div className="mt-3 space-y-2">
@@ -3937,8 +4050,8 @@ export default function App() {
                               onClick={() => handleQuickReply(reply.value)}
                               className="flex items-center gap-2 w-full bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
                             >
-                              {reply.icon}
                               <span>{reply.label}</span>
+                              {reply.icon}
                             </button>
                           ))}
                         </div>
@@ -3971,6 +4084,16 @@ export default function App() {
 
               <div ref={messagesEndRef} />
             </div>
+          )}
+
+          {/* Looks view */}
+          {activeTab === 'looks' && (
+            <LooksPage
+              onBack={() => handleTabChange('chat')}
+              looks={looks}
+              onNavigateToChat={() => handleTabChange('chat')}
+              isDesktop={isDesktop}
+            />
           )}
 
           {/* Deals view */}
@@ -4071,8 +4194,8 @@ export default function App() {
                                   }}
                                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-right"
                                 >
-                                  <Pause className="w-4 h-4" />
                                   <span>עצירת מעקב</span>
+                                  <Pause className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => {
@@ -4081,8 +4204,8 @@ export default function App() {
                                   }}
                                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-right"
                                 >
-                                  <Trash2 className="w-4 h-4" />
                                   <span>הסרת מעקב</span>
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
                             )}
@@ -4195,9 +4318,12 @@ export default function App() {
           {/* Image preview above input */}
           {uploadedImage && (
             <div className="mb-3 relative inline-block">
-              <img
+              <Image
                 src={uploadedImage}
                 alt="תצוגה מקדימה"
+                width={128}
+                height={128}
+                unoptimized
                 className="max-h-32 rounded-lg shadow-md border-2 border-purple-300"
               />
               <button
@@ -4311,8 +4437,8 @@ export default function App() {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                 >
-                  <Pause className="w-5 h-5" />
                   <span>עצירת מעקב</span>
+                  <Pause className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => {
@@ -4321,8 +4447,8 @@ export default function App() {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                 >
-                  <Trash2 className="w-5 h-5" />
                   <span>הסרת מעקב</span>
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -4642,6 +4768,7 @@ export default function App() {
               onBack={() => setCurrentPage('chat')}
               firstName={conversationState.productData.firstName}
               phoneNumber={conversationState.productData.phone}
+              gender={conversationState.productData.gender}
               onUpdateName={(newName) => {
                 setConversationState(prev => ({
                   ...prev,
@@ -4654,7 +4781,29 @@ export default function App() {
                   productData: { ...prev.productData, phone: newPhone }
                 }));
               }}
-              onUpgradeToPremium={() => setCurrentPage('premium-selection')}
+              onUpdateGender={(gender) => {
+                setConversationState(prev => ({
+                  ...prev,
+                  productData: { ...prev.productData, gender: gender || undefined }
+                }));
+              }}
+              isLoggedIn={isLoggedIn}
+              onLogin={() => {
+                setOtpReturnPage('profile');
+                setCurrentPage('login');
+              }}
+              onLogout={() => {
+                setIsLoggedIn(false);
+                setCurrentPage('chat');
+                const logoutMessage: Message = {
+                  id: messages.length + 1,
+                  type: 'assistant',
+                  content: 'נותקנו 🙂\nכשתרצי לחזור – אני פה.',
+                  timestamp: new Date(),
+                };
+                setMessages(prev => [...prev, logoutMessage]);
+              }}
+              onUpgradeToPremium={ENABLE_PREMIUM ? () => setCurrentPage('premium-selection') : undefined}
               isPremium={isPremiumUser}
               subscriptionType={selectedPremiumPlan || undefined}
               renewalDate={
@@ -4677,6 +4826,7 @@ export default function App() {
                 setPremiumStartDate(null);
               }}
               isDesktop={true}
+              enablePremium={ENABLE_PREMIUM}
             />
           )}
           {currentPage === 'account' && (
@@ -4685,6 +4835,11 @@ export default function App() {
               firstName={conversationState.productData.firstName}
               phoneNumber={otpPhone}
               isDesktop={isDesktop}
+              isLoggedIn={isLoggedIn}
+              onLogin={() => {
+                setOtpReturnPage('account');
+                setCurrentPage('login');
+              }}
               onLogout={() => {
                 setIsLoggedIn(false);
                 setCurrentPage('chat');

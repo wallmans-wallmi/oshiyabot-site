@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ArrowRight, LogIn } from 'lucide-react';
+import { X, ArrowLeft, LogIn } from 'lucide-react';
 
 interface LoginPageProps {
   onClose: () => void;
@@ -66,6 +66,7 @@ export function LoginPage({ onClose, onSendOTP }: LoginPageProps) {
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white transition-all duration-200"
               style={{ minHeight: '44px' }}
               inputMode="tel"
+              dir="ltr"
               aria-label="Israeli phone number"
             />
             {error && (
@@ -79,7 +80,7 @@ export function LoginPage({ onClose, onSendOTP }: LoginPageProps) {
             style={{ minHeight: '44px' }}
           >
             <span>שלחו לי קוד</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
         </div>
 

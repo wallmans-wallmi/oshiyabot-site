@@ -1,4 +1,5 @@
 import React, { useState, useRef, DragEvent, ChangeEvent, ClipboardEvent } from 'react';
+import Image from 'next/image';
 import { Upload, Image as ImageIcon, X, Paperclip } from 'lucide-react';
 
 interface ImageUploaderBoxProps {
@@ -194,10 +195,13 @@ export function ImageUploaderBox({
         {/* Preview State */}
         {preview && (
           <div className="relative h-full w-full rounded-lg overflow-hidden group">
-            <img
+            <Image
               src={preview}
               alt="תצוגה מקדימה"
+              width={400}
+              height={400}
               className="w-full h-full object-contain rounded-lg"
+              unoptimized
             />
             
             {/* Remove button */}

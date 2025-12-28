@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowRight, Shield } from 'lucide-react';
+import { X, ArrowLeft, Shield } from 'lucide-react';
 
 interface OTPVerificationProps {
   phoneNumber: string;
@@ -118,7 +118,7 @@ export function OTPVerification({ phoneNumber, onClose, onVerify, onResend }: OT
             style={{ minHeight: '44px' }}
           >
             <span>אישור</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
 
           <div className="text-center">
