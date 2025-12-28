@@ -230,7 +230,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
   const [isMenuOpening, setIsMenuOpening] = useState(false);
-  type PageType = 'chat' | 'about' | 'what' | 'how' | 'privacy' | 'terms' | 'demo' | 'accessibility' | 'accessibility-statement' | 'contact' | 'login' | 'otp' | 'account' | 'profile' | 'trackings' | 'settings' | 'payment' | 'premium-selection';
+  type PageType = 'chat' | 'about' | 'what' | 'how' | 'privacy' | 'terms' | 'demo' | 'accessibility' | 'accessibility-statement' | 'contact' | 'login' | 'otp' | 'account' | 'profile' | 'trackings' | 'settings' | 'payment' | 'premium-selection' | 'ui-foundations';
   const [currentPage, setCurrentPage] = useState<PageType>('chat');
   const [selectedPremiumPlan, setSelectedPremiumPlan] = useState<'monthly' | 'yearly' | null>(null);
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(new Set());
@@ -456,7 +456,7 @@ export default function App() {
     // Expose navigation function to window for console access
     (window as any).oshiyaNavigate = (page: string) => {
       // Runtime check to validate that the page is in the allowed list
-      const allowedPages: PageType[] = ['chat', 'about', 'what', 'how', 'privacy', 'terms', 'demo', 'accessibility', 'accessibility-statement', 'contact', 'login', 'otp', 'account', 'profile', 'trackings', 'settings', 'payment', 'premium-selection'];
+      const allowedPages: PageType[] = ['chat', 'about', 'what', 'how', 'privacy', 'terms', 'demo', 'accessibility', 'accessibility-statement', 'contact', 'login', 'otp', 'account', 'profile', 'trackings', 'settings', 'payment', 'premium-selection', 'ui-foundations'];
       // Type guard: check if page is a valid PageType using type narrowing
       const isValidPage = (p: string): p is PageType => {
         return (allowedPages as readonly string[]).includes(p);
