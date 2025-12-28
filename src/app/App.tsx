@@ -76,7 +76,7 @@ interface ConversationState {
   };
 }
 
-interface Deal {
+export interface Deal {
   id: number;
   productName: string;
   storeName: string;
@@ -90,10 +90,12 @@ interface Deal {
   sentAt: Date;
   lastCheckedAt: Date;
   status: 'active' | 'paused' | 'expired';
-  priceTarget?: number; // Target price user wants to reach
+  priceTarget: number; // Target price user wants to reach (required for TrackingsPage)
   startingPrice?: number; // Price when tracking started
   expirationReason?: string; // Reason why tracking expired (system-initiated only)
   pausedAt?: Date; // When user paused the tracking
+  startDate: Date; // Date when tracking started (required for TrackingsPage)
+  imageUrl?: string; // Optional image URL for the product (used by TrackingsPage)
 }
 
 export default function App() {
@@ -123,6 +125,7 @@ export default function App() {
       status: 'active',
       priceTarget: 850,
       startingPrice: 1059,
+      startDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
     },
     {
       id: 2,
@@ -141,6 +144,7 @@ export default function App() {
       priceTarget: 4200,
       startingPrice: 4899,
       expirationReason: 'לא הייתה ירידת מחיר משמעותית כבר 30 ימים',
+      startDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
     },
     {
       id: 3,
@@ -159,6 +163,7 @@ export default function App() {
       startingPrice: 3299,
       priceTarget: 2700,
       pausedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      startDate: new Date(Date.now() - 5 * 60 * 60 * 1000),
     },
     {
       id: 4,
@@ -177,6 +182,7 @@ export default function App() {
       priceTarget: 750,
       startingPrice: 999,
       expirationReason: 'המוצר לא זמין כרגע בחנויות שאנחנו עוקבים אחריהן',
+      startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
     },
     {
       id: 5,
@@ -195,6 +201,7 @@ export default function App() {
       priceTarget: 900,
       startingPrice: 1399,
       expirationReason: 'יעד המחיר שהוגדר כבר לא תואם את מחירי השוק',
+      startDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
     },
   ]);
   const [messages, setMessages] = useState<Message[]>(() => {

@@ -2,17 +2,7 @@ import React, { useState } from 'react';
 import { ArrowRight, Package, TrendingDown, Clock, XCircle, X } from 'lucide-react';
 import { AccessibilityButton } from './AccessibilityButton';
 import { AccessibilityMenu } from './AccessibilityMenu';
-
-interface Deal {
-  id: number;
-  productName: string;
-  currentPrice: number;
-  priceTarget: number;
-  status: 'active' | 'paused' | 'expired';
-  imageUrl?: string;
-  startDate: Date;
-  expirationReason?: string;
-}
+import { Deal } from '../App';
 
 interface TrackingsPageProps {
   onBack: () => void;
