@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { X, Sparkles, Target, Bell, Shield } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 const oshiyaAvatar = "/assets/ea9d3f873ca76c584ffa18ac5550589db242a0e0.png";
 
 interface WhatPageProps {
@@ -71,7 +71,7 @@ export function WhatPage({ onClose, isDesktop = false }: WhatPageProps) {
 
             <p>
               אני לא עוד אתר דילים,<br />
-              לא תיבת ספאם שצועקת "עד 70%!!!",<br />
+              לא תיבת ספאם שצועקת &quot;עד 70%!!!&quot;,<br />
               ולא אחת שמנסה לדחוף לך לינקים בלי שביקשת.
             </p>
 

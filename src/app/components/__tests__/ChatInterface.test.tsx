@@ -1,6 +1,8 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChatInterface } from '../ChatInterface'
+import type { ChatInterfaceProps } from '../ChatInterface'
 
 // Mock Next.js Image component
 jest.mock('next/image', () => ({
@@ -12,7 +14,7 @@ jest.mock('next/image', () => ({
 }))
 
 describe('ChatInterface', () => {
-  const mockProps = {
+  const mockProps: ChatInterfaceProps = {
     messages: [],
     isTyping: false,
     message: '',
@@ -21,21 +23,7 @@ describe('ChatInterface', () => {
     handleImageUpload: jest.fn(),
     uploadedImage: null,
     setUploadedImage: jest.fn(),
-    handleQuickReply: jest.fn(),
-    conversationState: {
-      path: 'initial',
-      step: 0,
-      productData: {}
-    },
-    isLoggedIn: false,
-    onLoginClick: jest.fn(),
-    onAccountClick: jest.fn(),
-    activeTab: 'chat',
-    hasDeals: false,
-    unreadDealsCount: 0,
-    onDealsClick: jest.fn(),
-    onNavigateToPage: jest.fn(),
-    isDesktop: false
+    handleQuickReply: jest.fn()
   }
 
   beforeEach(() => {
@@ -59,7 +47,8 @@ describe('ChatInterface', () => {
       },
     ]
 
-    render(<ChatInterface {...mockProps} messages={messages} />)
+    const props: ChatInterfaceProps = { ...mockProps, messages }
+    render(<ChatInterface {...props} />)
 
     // Use flexible text matching in case text nodes are split
     expect(screen.getByText(/Hello/)).toBeInTheDocument()
@@ -71,7 +60,8 @@ describe('ChatInterface', () => {
   })
 
   it('displays typing indicator when isTyping is true', () => {
-    render(<ChatInterface {...mockProps} isTyping={true} />)
+    const props: ChatInterfaceProps = { ...mockProps, isTyping: true }
+    render(<ChatInterface {...props} />)
 
     const typingIndicator = screen.getByTestId('typing-indicator')
     expect(typingIndicator).toBeInTheDocument()
@@ -80,7 +70,8 @@ describe('ChatInterface', () => {
   })
 
   it('renders message input with correct placeholder', () => {
-    render(<ChatInterface {...mockProps} />)
+    const props: ChatInterfaceProps = { ...mockProps }
+    render(<ChatInterface {...props} />)
 
     const input = screen.getByPlaceholderText('כתבי כאן...')
     expect(input).toBeInTheDocument()
@@ -89,7 +80,8 @@ describe('ChatInterface', () => {
 
   it('sends message on button click', async () => {
     const user = userEvent.setup()
-    render(<ChatInterface {...mockProps} message="Test message" />)
+    const props: ChatInterfaceProps = { ...mockProps, message: "Test message" }
+    render(<ChatInterface {...props} />)
 
     const sendButton = screen.getByTestId('send-button') as HTMLButtonElement
     // When message has content, button should be enabled
@@ -100,7 +92,8 @@ describe('ChatInterface', () => {
   })
 
   it('calls handleImageUpload when uploading a file', () => {
-    render(<ChatInterface {...mockProps} />)
+    const props: ChatInterfaceProps = { ...mockProps }
+    render(<ChatInterface {...props} />)
 
     // File input is hidden, use test ID to find it
     const fileInput = screen.getByTestId('file-input') as HTMLInputElement
@@ -132,7 +125,8 @@ describe('ChatInterface', () => {
       }
     ]
 
-    render(<ChatInterface {...mockProps} messages={messagesWithQuickReplies} />)
+    const props: ChatInterfaceProps = { ...mockProps, messages: messagesWithQuickReplies }
+    render(<ChatInterface {...props} />)
 
     // Verify quick reply buttons are present using common test ID
     const quickReplyButtons = screen.getAllByTestId('quick-reply-button')
@@ -152,7 +146,8 @@ describe('ChatInterface', () => {
 
   it('when uploadedImage is provided, it is displayed with delete button', async () => {
     const user = userEvent.setup()
-    render(<ChatInterface {...mockProps} uploadedImage="/some/path.jpg" />)
+    const props: ChatInterfaceProps = { ...mockProps, uploadedImage: "/some/path.jpg" }
+    render(<ChatInterface {...props} />)
 
     // Verify image container is rendered
     const imageContainer = screen.getByTestId('uploaded-image-container')

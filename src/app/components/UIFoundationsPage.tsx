@@ -98,7 +98,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
                 <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 shadow-sm"></div>
                 <div>
                   <p className="font-medium text-gray-900">Gradient Primary</p>
-                  <p className="text-sm text-gray-500">purple-600 → pink-600 • הודעות העוזרת בצ'אט</p>
+                  <p className="text-sm text-gray-500">purple-600 → pink-600 • הודעות העוזרת בצ&apos;אט</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -161,7 +161,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
                 <div className="w-16 h-16 bg-purple-100 rounded-2xl"></div>
                 <div>
                   <p className="font-medium text-gray-900">rounded-2xl</p>
-                  <p className="text-sm text-gray-500">בועות צ'אט</p>
+                  <p className="text-sm text-gray-500">בועות צ&apos;אט</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -208,7 +208,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
               bg-purple-600 text-white px-4 py-3 rounded-xl<br />
               hover:bg-purple-700 transition-all duration-200<br />
               hover:scale-[1.01] shadow-sm<br />
-              minHeight: '44px'
+              minHeight: &apos;44px&apos;
             </div>
           </div>
 
@@ -357,7 +357,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
               px-4 py-3 rounded-xl border-2 border-gray-300<br />
               focus:border-purple-400 focus:ring-2<br />
               focus:ring-purple-200 bg-white<br />
-              minHeight: '44px'
+              minHeight: &apos;44px&apos;
             </div>
           </div>
         </section>
@@ -426,7 +426,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
               backdrop-blur-sm text-white<br />
               px-4 py-2 rounded-xl<br />
               border border-white/20<br />
-              minHeight: '44px'<br />
+              minHeight: &apos;44px&apos;<br />
               <br />
               הערה: בשימוש בפועל הם מופיעים על רקע סגול<br />
               ולכן text-white. כאן בדוגמה text-purple-900
@@ -443,14 +443,14 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
             <h4 className="font-semibold text-gray-900 mb-4">Tabs</h4>
             <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
               <button className="flex-1 py-2 px-4 rounded-lg bg-white text-gray-900 shadow-sm font-medium transition-all">
-                צ'אט
+                צ&apos;אט
               </button>
               <button className="flex-1 py-2 px-4 rounded-lg text-gray-600 hover:text-gray-900 transition-colors">
                 עסקאות
               </button>
             </div>
             <p className="text-sm text-gray-500 mt-3">
-              נמצא ב: DesktopLayout (מעבר בין צ'אט לעסקאות)
+              נמצא ב: DesktopLayout (מעבר בין צ&apos;אט לעסקאות)
             </p>
             <div className="mt-3 p-4 bg-gray-50 rounded-lg text-sm font-mono text-gray-700">
               Container: flex gap-1 bg-gray-100 p-1 rounded-xl<br />
@@ -517,7 +517,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
                 <span className="text-3xl">🎉</span>
               </div>
               <p className="text-sm text-gray-500 mt-3">
-                משמשים בעיקר בתוך בועות צ'אט ובמסכי onboarding<br />
+                משמשים בעיקר בתוך בועות צ&apos;אט ובמסכי onboarding<br />
                 מוסיפים חום ואישיות לטון הידידותי של אושייה
               </p>
             </div>
@@ -557,7 +557,7 @@ export function UIFoundationsPage({ onClose }: UIFoundationsPageProps) {
                 <li>✓ טקסט בניווט (Tabs)</li>
                 <li>✓ אייקון העלאת תמונה</li>
                 <li>✓ כפתור נגישות</li>
-                <li>✓ כפתור "לבדוק שוב" במעקבים שפג תוקפם</li>
+                <li>✓ כפתור &quot;לבדוק שוב&quot; במעקבים שפג תוקפם</li>
                 <li>✓ אייקוני כלי עזר</li>
               </ul>
             </div>

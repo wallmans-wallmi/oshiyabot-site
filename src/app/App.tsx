@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Sparkles, Tag, Send, TrendingDown, Bell, Info, Menu, X, Image as ImageIcon, ExternalLink, MessageCircle, Settings, EllipsisVertical, Pause, Trash2, Pencil, ChevronDown, User, Eye, Shield, Cookie, Scale } from 'lucide-react';
+import { Sparkles, Send, Bell, Info, Menu, X, Image as ImageIcon, ExternalLink, MessageCircle, Settings, EllipsisVertical, Pause, Trash2, Pencil, ChevronDown, User, Eye, Cookie, Scale } from 'lucide-react';
 
 // Extend Window interface for console navigation helper
 declare global {
@@ -37,7 +37,6 @@ import { LoginPage } from './components/LoginPage';
 import { OTPVerification } from './components/OTPVerification';
 import { AccountPage } from './components/AccountPage';
 import { SettingsPage } from './components/SettingsPage';
-import { ResponsivePageWrapper } from './components/ResponsivePageWrapper';
 import { UIFoundationsPage } from './components/UIFoundationsPage';
 import { ChatScrollToLatestButton } from './components/ChatScrollToLatestButton';
 import { PaymentPage } from './components/PaymentPage';
@@ -288,7 +287,6 @@ export default function App() {
   const [completedTrackingsCount, setCompletedTrackingsCount] = useState(0);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const dealsContainerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Detect desktop vs mobile
@@ -547,7 +545,8 @@ export default function App() {
     if (messages.length > 2 || (messages.length === 2 && messages[0].id !== 1)) {
       // Remove contentJSX before saving (it contains React elements that can't be serialized)
       const messagesForStorage = messages.map(msg => {
-        const { contentJSX, ...rest } = msg;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { contentJSX: _contentJSX, ...rest } = msg;
         return rest;
       });
       localStorage.setItem('oshiya-messages', JSON.stringify(messagesForStorage));
@@ -1155,7 +1154,9 @@ export default function App() {
                     <span className="text-sm">
                       אם יש לך שאלה פתוחה – אני כאן.
                       <br />למשל:
-                      <br />• \"מה באמת ההבדל בין הדגמים?\"\n                      <br />• \"שווה לחכות לגרסה הבאה?\"\n                    </span>
+                      <br />• &quot;מה באמת ההבדל בין הדגמים?&quot;
+                      <br />• &quot;שווה לחכות לגרסה הבאה?&quot;
+                    </span>
                   ),
                   content: 'אם יש לך שאלה פתוחה – א����י כאן.\\nלמשל:\\n• \"מה באמת ההבדל בין הדגמים?\"\\n• \"שווה לחכות ��גרסה הבאה?\"',
                   timestamp: new Date(),
@@ -1277,7 +1278,7 @@ export default function App() {
         else if (hostname.includes('ksp')) storeKey = 'ksp';
         else if (hostname.includes('idigital')) storeKey = 'idigital';
         // Add more stores as needed
-      } catch (e) {
+      } catch {
         // If URL parsing fails, use default
       }
 
@@ -1691,7 +1692,6 @@ export default function App() {
       setConversationState(prev => ({ ...prev, step: 9 }));
       setIsTyping(true);
       setTimeout(() => {
-        const productName = conversationState.productData.name || 'המוצר';
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           type: 'assistant',
@@ -2620,8 +2620,8 @@ export default function App() {
                       <span className="text-sm">
                         אם יש לך שאלה פתוחה – אני כאן.
                         <br />למשל:
-                        <br />• "מה באמת ההבדל בין הדגמים?"
-                        <br />• "שווה לחכות לגרסה הבאה?"
+                        <br />• &quot;מה באמת ההבדל בין הדגמים?&quot;
+                        <br />• &quot;שווה לחכות לגרסה הבאה?&quot;
                       </span>
                     ),
                     content: 'אם יש לך שאלה פתוחה – אני כאן.\nלמשל:\n• "מה באמת ההבדל בין הדגמים?"\n• "שווה לחכות לגרסה הבאה?"',
@@ -2745,8 +2745,8 @@ export default function App() {
                       <span className="text-sm">
                         אם יש לך שאלה פתוחה – אני כאן.
                         <br />למשל:
-                        <br />• "מה באמת ההבדל בין הדגמים?"
-                        <br />• "שווה לחכות לגרסה הבאה?"
+                        <br />• &quot;מה באמת ההבדל בין הדגמים?&quot;
+                        <br />• &quot;שווה לחכות לגרסה הבאה?&quot;
                       </span>
                     ),
                     content: 'אם יש לך שאלה פתוחה – אני כאן.\nלמשל:\n• "מה באמת ההבדל בין הדגמים?"\n• "שווה לחכות לגרסה הבאה?"',
@@ -2969,11 +2969,6 @@ export default function App() {
     setShowRemoveConfirmation(null);
   };
 
-  const handleDealsIconClick = () => {
-    if (deals.length > 0) {
-      handleTabChange('deals');
-    }
-  };
 
   const formatTimestamp = (timestamp: Date) => {
     const now = new Date();
@@ -3036,7 +3031,6 @@ export default function App() {
   };
 
   const unreadDealsCount = deals.filter(deal => !deal.isRead).length;
-  const hasDeals = deals.length > 0;
   
   // Filter deals based on selected filter
   const filteredDeals = deals.filter(deal => {
@@ -3046,24 +3040,6 @@ export default function App() {
   });
   
   const activeDealsCount = deals.filter(deal => deal.status === 'active' || deal.status === 'paused').length;
-  const expiredDealsCount = deals.filter(deal => deal.status === 'expired').length;
-
-  // Render content for the current page
-  const renderPageContent = () => {
-    if (currentPage === 'about') {
-      return <AboutPage onClose={() => setCurrentPage('chat')} onNavigateToWhat={() => setCurrentPage('what')} isDesktop={isDesktop} />;
-    }
-    if (currentPage === 'what') {
-      return <WhatPage onClose={() => setCurrentPage('chat')} isDesktop={isDesktop} />;
-    }
-    if (currentPage === 'contact') {
-      return <ContactPage onClose={() => setCurrentPage('chat')} isDesktop={isDesktop} />;
-    }
-    if (currentPage === 'ui-foundations') {
-      return <UIFoundationsPage onClose={() => setCurrentPage('chat')} />;
-    }
-    return null;
-  };
 
   return (
     <>
@@ -3174,7 +3150,7 @@ export default function App() {
               setCurrentPage('login');
             }
           }}
-          onVerify={(code) => {
+          onVerify={() => {
             // Check if user has existing conversation
             const hasExistingConversation = messages.length > 2;
             
@@ -3334,7 +3310,7 @@ export default function App() {
               }`}
             >
               <MessageCircle className="w-4 h-4" />
-              <span>צ'אט</span>
+              <span>צ&apos;אט</span>
             </button>
 
             {/* האזור שלי - דרופדאון */}
@@ -4066,10 +4042,13 @@ export default function App() {
               {isTyping && (
                 <div className="flex gap-2 justify-start">
                   <div className="flex-shrink-0">
-                    <img
+                    <Image
                       src={oshiyaAvatar}
                       alt="Oshiya"
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover"
+                      unoptimized
                     />
                   </div>
                   <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
@@ -4089,10 +4068,8 @@ export default function App() {
           {/* Looks view */}
           {activeTab === 'looks' && (
             <LooksPage
-              onBack={() => handleTabChange('chat')}
               looks={looks}
               onNavigateToChat={() => handleTabChange('chat')}
-              isDesktop={isDesktop}
             />
           )}
 
@@ -4457,9 +4434,7 @@ export default function App() {
       })()}
 
       {/* Pause confirmation bottom sheet */}
-      {showPauseConfirmation !== null && (() => {
-        const deal = deals.find(d => d.id === showPauseConfirmation);
-        return (
+      {showPauseConfirmation !== null && (
           <>
             {/* Backdrop */}
             <div 
@@ -4504,8 +4479,7 @@ export default function App() {
               </div>
             </div>
           </>
-        );
-      })()}
+      )}
 
       {/* Remove confirmation dialog */}
       {showRemoveConfirmation !== null && (
@@ -4555,9 +4529,7 @@ export default function App() {
       )}
 
       {/* Restore tracking bottom sheet */}
-      {showRestoreSheet !== null && (() => {
-        const deal = deals.find(d => d.id === showRestoreSheet);
-        return (
+      {showRestoreSheet !== null && (
           <>
             {/* Backdrop */}
             <div 
@@ -4633,8 +4605,7 @@ export default function App() {
               </div>
             </div>
           </>
-        );
-      })()}
+      )}
 
       {/* Edit Price Target bottom sheet */}
       {showEditPriceTarget !== null && (() => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, X } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 const howImage = "/assets/9da14f689d0aad6e5536fd64386b0685a4bf8bb0.png";
 
 interface HowPageProps {
@@ -55,7 +55,7 @@ export function HowPage({ onBack, isDesktop = false }: HowPageProps) {
             <p className="text-gray-700 leading-relaxed">
               את זורקת לי וייב:<br />
               מה את מחפשת, לאיזה סיטואציה, מה הסגנון שלך, מה התקציב.<br />
-              אפשר גם תמונה, השראה מהפינטרסט, או "אין לי מושג, אבל בא לי משהו מיוחד".
+              אפשר גם תמונה, השראה מהפינטרסט, או &quot;אין לי מושג, אבל בא לי משהו מיוחד&quot;.
             </p>
           </section>
 
@@ -86,7 +86,7 @@ export function HowPage({ onBack, isDesktop = false }: HowPageProps) {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">שלב 5 – כשיש ירידת מחיר אמיתית, את מקבלת התראה</h2>
             <p className="text-gray-700 leading-relaxed">
-              בלי ספאם. בלי "החגיגות החלו".<br />
+              בלי ספאם. בלי &quot;החגיגות החלו&quot;.<br />
               רק כשזה באמת מרגיש שווה.
             </p>
           </section>

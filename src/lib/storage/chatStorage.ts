@@ -21,7 +21,8 @@ export function saveMessages(messages: Message[]): void {
   
   // Remove contentJSX before saving (it contains React elements that can't be serialized)
   const messagesForStorage = messages.map(msg => {
-    const { contentJSX, ...rest } = msg;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { contentJSX: _contentJSX, ...rest } = msg;
     return rest;
   });
   
@@ -121,6 +122,7 @@ export function saveChatSession(session: ChatSession): void {
     const sessionForStorage = {
       ...session,
       messages: session.messages.map(msg => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { contentJSX, ...rest } = msg;
         return rest;
       }),

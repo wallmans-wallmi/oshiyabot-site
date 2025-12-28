@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, User, Edit2, Plus, X, Crown, Calendar, TrendingUp, LogOut } from 'lucide-react';
+import { User, Edit2, Plus, X, Crown, LogOut } from 'lucide-react';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
 
 interface ProfilePageProps {
@@ -7,7 +7,6 @@ interface ProfilePageProps {
   firstName?: string;
   phoneNumber?: string;
   gender?: 'male' | 'female';
-  onEditPhone?: () => void;
   onUpdateName?: (newName: string) => void;
   onUpdatePhone?: (newPhone: string) => void;
   onUpdateGender?: (gender: 'male' | 'female' | null) => void;
@@ -21,8 +20,6 @@ interface ProfilePageProps {
   renewalDate?: string;
   activeTrackings?: number;
   onUpgradeToPremium?: () => void;
-  onManageSubscription?: () => void;
-  onSwitchPlan?: (newPlan: 'monthly' | 'yearly') => void;
   onCancelSubscription?: () => void;
   // Feature flag to hide premium features
   enablePremium?: boolean;
@@ -33,7 +30,6 @@ export function ProfilePage({
   firstName, 
   phoneNumber,
   gender,
-  onEditPhone,
   onUpdateName,
   onUpdatePhone,
   onUpdateGender,
@@ -47,8 +43,6 @@ export function ProfilePage({
   renewalDate,
   activeTrackings,
   onUpgradeToPremium,
-  onManageSubscription,
-  onSwitchPlan,
   onCancelSubscription,
   enablePremium = true
 }: ProfilePageProps) {

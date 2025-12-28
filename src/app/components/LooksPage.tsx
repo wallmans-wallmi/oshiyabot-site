@@ -4,19 +4,15 @@ import { Sparkles, X, Calendar } from 'lucide-react';
 import { Look } from '../App';
 
 interface LooksPageProps {
-  onBack: () => void;
   looks: Look[];
   onLookClick?: (lookId: number) => void;
   onNavigateToChat?: () => void;
-  isDesktop?: boolean;
 }
 
 export function LooksPage({ 
-  onBack, 
   looks = [],
   onLookClick,
-  onNavigateToChat,
-  isDesktop = false
+  onNavigateToChat
 }: LooksPageProps) {
   const [selectedLookId, setSelectedLookId] = useState<number | null>(null);
 
@@ -137,7 +133,7 @@ export function LooksPage({
                   onClick={onNavigateToChat}
                   className="flex-1 bg-purple-600 text-white px-4 py-3 rounded-xl hover:bg-purple-700 transition-all duration-200"
                 >
-                  חזרה לצ'אט
+                  חזרה לצ&apos;אט
                 </button>
               )}
             </div>
@@ -168,7 +164,7 @@ export function LooksPage({
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">עדיין אין לוקים שמורים</h3>
               <p className="text-gray-600 mb-6">
-                כשתשמרי לוק מהצ'אט, הוא יופיע כאן! ✨
+                כשתשמרי לוק מהצ&apos;אט, הוא יופיע כאן! ✨
               </p>
               {onNavigateToChat && (
                 <button
@@ -176,7 +172,7 @@ export function LooksPage({
                   className="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition-all duration-200 hover:scale-105 shadow-md inline-flex items-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
-                  <span>חזרה לצ'אט</span>
+                  <span>חזרה לצ&apos;אט</span>
                 </button>
               )}
             </div>

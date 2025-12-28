@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ArrowRight, Package, TrendingDown, Clock, XCircle, X } from 'lucide-react';
+import { Package, TrendingDown, Clock, XCircle, X } from 'lucide-react';
 import { AccessibilityButton } from './AccessibilityButton';
 import { AccessibilityMenu } from './AccessibilityMenu';
 import { Deal } from '../App';
@@ -9,14 +9,12 @@ interface TrackingsPageProps {
   onBack: () => void;
   deals: Deal[];
   onDealClick?: (dealId: number) => void;
-  isDesktop?: boolean;
 }
 
 export function TrackingsPage({ 
   onBack, 
   deals = [],
-  onDealClick,
-  isDesktop = false
+  onDealClick
 }: TrackingsPageProps) {
   const [isAccessibilityMenuOpen, setIsAccessibilityMenuOpen] = useState(false);
   const activeDeals = deals.filter(d => d.status === 'active');

@@ -72,7 +72,7 @@ export function TermsPage({ onClose, isDesktop = false }: TermsPageProps) {
         <section className="space-y-4">
           <h2 className="font-bold text-gray-900 text-xl">2. אין התחייבות</h2>
           <p className="text-gray-800 leading-relaxed">
-            השירות ניתן כמו שהוא ("As is") – בלי אחריות על זמינות, תקלות או טעויות במחירים.
+            השירות ניתן כמו שהוא (&quot;As is&quot;) – בלי אחריות על זמינות, תקלות או טעויות במחירים.
           </p>
           <p className="text-gray-800 leading-relaxed">
             אנחנו עושים מאמץ לתת מידע מדויק ועדכני, אבל יכולות לקרות טעויות, שינויים פתאומיים במחיר, או הבדל בין ההמלצה לבין מה שקורה בפועל באתר החנות.

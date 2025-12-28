@@ -2,6 +2,15 @@ import React from 'react';
 import { InlineInputs } from '../components/InlineInputs';
 import { AccountPreviewCard } from '../components/AccountPreviewCard';
 
+interface Message {
+  id: number;
+  type: 'user' | 'assistant';
+  content: string;
+  contentJSX?: React.ReactNode;
+  timestamp: Date;
+  quickReplies?: QuickReply[];
+}
+
 interface QuickReply {
   label: string;
   value: string;
@@ -47,9 +56,7 @@ export function createNameRequestMessage(
   };
 }
 
-export function createAccountSuggestionMessage(
-  onReply: (value: string) => void
-): {
+export function createAccountSuggestionMessage(): {
   id: number;
   type: 'assistant';
   contentJSX: React.ReactNode;
@@ -129,7 +136,7 @@ export function createAccountDeclinedMessage(): {
 
 export function createNameConfirmationSequence(
   firstName: string,
-  setMessages: React.Dispatch<React.SetStateAction<any[]>>,
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setIsTyping: React.Dispatch<React.SetStateAction<boolean>>,
   isFirstTimeUser: boolean,
   onAccountSuggestion?: (value: string) => void
@@ -159,7 +166,7 @@ export function createNameConfirmationSequence(
         setTimeout(() => {
           setIsTyping(true);
           setTimeout(() => {
-            const accountSuggestion = createAccountSuggestionMessage(onAccountSuggestion);
+            const accountSuggestion = createAccountSuggestionMessage();
             setMessages(prev => [...prev, accountSuggestion]);
             setIsTyping(false);
           }, 800);
@@ -173,7 +180,7 @@ export function createNameConfirmationSequence(
 }
 
 function continueNormalFlow(
-  setMessages: React.Dispatch<React.SetStateAction<any[]>>,
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setIsTyping: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   setTimeout(() => {
@@ -197,8 +204,8 @@ function continueNormalFlow(
               <span className="text-sm">
                 אם יש לך שאלה פתוחה – אני כאן.
                 <br />למשל:
-                <br />• "מה באמת ההבדל בין הדגמים?"
-                <br />• "שווה לחכות לגרסה הבאה?"
+                <br />• &quot;מה באמת ההבדל בין הדגמים?&quot;
+                <br />• &quot;שווה לחכות לגרסה הבאה?&quot;
               </span>
             ),
             content: 'אם יש לך שאלה פתוחה – אני כאן.\nלמשל:\n• "מה באמת ההבדל בין הדגמים?"\n• "שווה לחכות לגרסה הבאה?"',

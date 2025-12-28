@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { Send, Image as ImageIcon, Sparkles, Tag, TrendingDown, Bell, MessageCircle, Menu, X } from 'lucide-react';
+import { Send, Image as ImageIcon, X } from 'lucide-react';
 
 interface Message {
   id: number | string;
@@ -30,28 +30,7 @@ interface InlineInput {
   inputMode?: 'text' | 'numeric' | 'tel';
 }
 
-interface ConversationState {
-  path: 'initial' | 'has-product' | 'needs-help';
-  step: number;
-  productData: {
-    name?: string;
-    link?: string;
-    image?: string;
-    details?: string;
-    priceTarget?: string;
-    timing?: string;
-    category?: string;
-    requirements?: string;
-    budget?: string;
-    phone?: string;
-    firstName?: string;
-    gender?: 'male' | 'female';
-    target_type?: 'target_price' | 'percent_drop';
-    target_value?: number;
-  };
-}
-
-interface ChatInterfaceProps {
+export interface ChatInterfaceProps {
   messages: Message[];
   isTyping: boolean;
   message: string;
@@ -61,16 +40,6 @@ interface ChatInterfaceProps {
   uploadedImage: string | null;
   setUploadedImage: (img: string | null) => void;
   handleQuickReply: (value: string) => void;
-  conversationState: ConversationState;
-  isLoggedIn: boolean;
-  onLoginClick: () => void;
-  onAccountClick: () => void;
-  activeTab: 'chat' | 'deals';
-  hasDeals: boolean;
-  unreadDealsCount: number;
-  onDealsClick: () => void;
-  onNavigateToPage?: (page: string) => void;
-  isDesktop?: boolean;
 }
 
 export function ChatInterface({ 
@@ -82,17 +51,7 @@ export function ChatInterface({
   handleImageUpload,
   uploadedImage,
   setUploadedImage,
-  handleQuickReply,
-  conversationState,
-  isLoggedIn,
-  onLoginClick,
-  onAccountClick,
-  activeTab,
-  hasDeals,
-  unreadDealsCount,
-  onDealsClick,
-  onNavigateToPage,
-  isDesktop = false
+  handleQuickReply
 }: ChatInterfaceProps) {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);

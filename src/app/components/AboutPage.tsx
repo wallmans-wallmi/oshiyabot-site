@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { ArrowLeft, Sparkles, Target, Heart, Info, X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 const oshiyaAvatar = "/assets/8987b8bb591c6b85bd934a46b81596f6b40dd7d7.png";
 
 interface AboutPageProps {
@@ -61,12 +61,12 @@ export function AboutPage({ onClose, onNavigateToWhat, isDesktop = false }: Abou
 
             <p>
               המשפט שאני הכי אוהבת?<br />
-              <span className="text-xl">"אמא, תקני לי."</span>
+              <span className="text-xl">&quot;אמא, תקני לי.&quot;</span>
             </p>
 
             <p>
-              ואם כבר מדברות על "תקני לי" – אז אני מאלה שעוצרים ברחוב ושואלים:<br />
-              "איפה קנית את זה?"
+              ואם כבר מדברות על &quot;תקני לי&quot; – אז אני מאלה שעוצרים ברחוב ושואלים:<br />
+              &quot;איפה קנית את זה?&quot;
             </p>
 
             <p>
@@ -107,7 +107,7 @@ export function AboutPage({ onClose, onNavigateToWhat, isDesktop = false }: Abou
 
             <p>
               אחרי הרבה שנים בהייטק, כמנהלת מחלקות עיצוב מוצר, החלטתי להקים משהו משלי.<br />
-              עברתי כמה ניסיונות וכיוונים, ובסוף – בלי יותר מדי כסף (כי ביטוח לאומי לא בדיוק לארג') – הבנתי שיש פה בעיה אישית שצריך לפתור.
+              עברתי כמה ניסיונות וכיוונים, ובסוף – בלי יותר מדי כסף (כי ביטוח לאומי לא בדיוק לארג&apos;) – הבנתי שיש פה בעיה אישית שצריך לפתור.
             </p>
 
             <p>

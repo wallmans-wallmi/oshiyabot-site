@@ -8,7 +8,8 @@
 import { AIClient, AIMessage } from './client';
 
 class MockAIClient implements AIClient {
-  async chat(messages: AIMessage[], context?: Record<string, unknown>): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async chat(messages: AIMessage[], _context?: Record<string, unknown>): Promise<string> {
     // Get the last user message
     const lastMessage = messages[messages.length - 1];
     

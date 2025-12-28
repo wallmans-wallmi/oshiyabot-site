@@ -1,6 +1,6 @@
 import React, { useState, useRef, DragEvent, ChangeEvent, ClipboardEvent } from 'react';
 import Image from 'next/image';
-import { Upload, Image as ImageIcon, X, Paperclip } from 'lucide-react';
+import { Upload, Image as ImageIcon, X } from 'lucide-react';
 
 interface ImageUploaderBoxProps {
   onImageUpload?: (file: File, preview: string) => void;

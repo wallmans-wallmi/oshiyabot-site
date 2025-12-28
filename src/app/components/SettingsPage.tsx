@@ -249,7 +249,7 @@ export function SettingsPage({ onClose, isDesktop }: SettingsPageProps) {
                       label={
                         <div>
                           <div>תבחרי לי משהו חכם לפי סוג המוצר</div>
-                          <div className="text-sm text-gray-400">(למשל חמישה עשר אחוז על גאדג'טים או מאה שקלים על מוצרי חשמל גדולים)</div>
+                          <div className="text-sm text-gray-400">(למשל חמישה עשר אחוז על גאדג&apos;טים או מאה שקלים על מוצרי חשמל גדולים)</div>
                         </div>
                       }
                     />

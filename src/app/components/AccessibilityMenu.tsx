@@ -52,7 +52,7 @@ export function AccessibilityMenu({ isOpen, onClose, onNavigateToStatement, isDe
         const parsed = JSON.parse(saved);
         setSettings(parsed);
         applySettings(parsed);
-      } catch (e) {
+      } catch {
         console.error('Failed to load accessibility settings');
       }
     }

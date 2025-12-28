@@ -33,7 +33,7 @@ export function PrivacyPage({ onClose, isDesktop = false }: PrivacyPageProps) {
           performance: parsed.performance || false,
           marketing: parsed.marketing || false,
         });
-      } catch (e) {
+      } catch {
         // Invalid JSON, ignore
       }
     }

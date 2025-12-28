@@ -17,7 +17,7 @@ export function AccessibilityButton({ onClick }: AccessibilityButtonProps) {
 
   useEffect(() => {
     setPosition(defaultBottom);
-  }, []);
+  }, [defaultBottom]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Prevent click from firing when starting to drag
@@ -36,7 +36,7 @@ export function AccessibilityButton({ onClick }: AccessibilityButtonProps) {
     e.stopPropagation();
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = () => {
     // Only trigger onClick if not dragging
     if (!isDragging) {
       onClick();

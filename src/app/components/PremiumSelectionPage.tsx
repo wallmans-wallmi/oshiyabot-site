@@ -4,10 +4,9 @@ import { X, Crown, Check, Sparkles } from 'lucide-react';
 interface PremiumSelectionPageProps {
   onBack: () => void;
   onContinueToPayment: (plan: 'monthly' | 'yearly') => void;
-  isDesktop?: boolean;
 }
 
-export function PremiumSelectionPage({ onBack, onContinueToPayment, isDesktop = false }: PremiumSelectionPageProps) {
+export function PremiumSelectionPage({ onBack, onContinueToPayment }: PremiumSelectionPageProps) {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
 
   return (

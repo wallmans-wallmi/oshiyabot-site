@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { ImageUploaderBox } from '../ImageUploaderBox'
 
 // Mock Next.js Image component
@@ -11,21 +10,30 @@ jest.mock('next/image', () => ({
   },
 }))
 
+interface MockFileReaderInstance {
+  readAsDataURL: jest.Mock
+  result: string
+  onloadend: (() => void) | null
+  readyState: number
+  error: Error | null
+  lastFile?: File
+}
+
 describe('ImageUploaderBox', () => {
   let mockOnImageUpload: jest.Mock
   let mockOnImageRemove: jest.Mock
-  let FileReaderConstructor: jest.Mock
+  let FileReaderConstructor: jest.Mock<MockFileReaderInstance>
 
   beforeEach(() => {
     mockOnImageUpload = jest.fn()
     mockOnImageRemove = jest.fn()
 
     // Mock FileReader constructor - create a new instance each time
-    FileReaderConstructor = jest.fn(function(this: any) {
-      const instance = {
+    FileReaderConstructor = jest.fn(function(this: unknown) {
+      const instance: MockFileReaderInstance = {
         readAsDataURL: jest.fn(function(file: File) {
           // Store the file for verification
-          ;(instance as any).lastFile = file
+          instance.lastFile = file
           // Simulate async behavior by calling onloadend in next tick
           setTimeout(() => {
             instance.result = 'data:image/png;base64,mockPreviewData'
@@ -41,7 +49,7 @@ describe('ImageUploaderBox', () => {
         error: null,
       }
       return instance
-    }) as unknown as jest.Mock
+    }) as jest.Mock<MockFileReaderInstance>
 
     global.FileReader = FileReaderConstructor as unknown as typeof FileReader
 
@@ -102,7 +110,8 @@ describe('ImageUploaderBox', () => {
 
       await waitFor(() => {
         expect(FileReaderConstructor).toHaveBeenCalled()
-        const fileReaderInstance = (FileReaderConstructor.mock.results[FileReaderConstructor.mock.results.length - 1]?.value as any)
+        const lastResult = FileReaderConstructor.mock.results[FileReaderConstructor.mock.results.length - 1]
+        const fileReaderInstance = lastResult?.value as MockFileReaderInstance | undefined
         expect(fileReaderInstance?.readAsDataURL).toHaveBeenCalledWith(validFile)
       })
 
@@ -201,7 +210,8 @@ describe('ImageUploaderBox', () => {
 
     await waitFor(() => {
       expect(FileReaderConstructor).toHaveBeenCalled()
-      const fileReaderInstance = (FileReaderConstructor.mock.results[FileReaderConstructor.mock.results.length - 1]?.value as any)
+      const lastResult = FileReaderConstructor.mock.results[FileReaderConstructor.mock.results.length - 1]
+      const fileReaderInstance = lastResult?.value as MockFileReaderInstance | undefined
       expect(fileReaderInstance?.readAsDataURL).toHaveBeenCalledWith(validFile)
     })
 
@@ -238,7 +248,8 @@ describe('ImageUploaderBox', () => {
 
     await waitFor(() => {
       expect(FileReaderConstructor).toHaveBeenCalled()
-      const fileReaderInstance = (FileReaderConstructor.mock.results[FileReaderConstructor.mock.results.length - 1]?.value as any)
+      const lastResult = FileReaderConstructor.mock.results[FileReaderConstructor.mock.results.length - 1]
+      const fileReaderInstance = lastResult?.value as MockFileReaderInstance | undefined
       expect(fileReaderInstance?.readAsDataURL).toHaveBeenCalledWith(validFile)
     })
 
