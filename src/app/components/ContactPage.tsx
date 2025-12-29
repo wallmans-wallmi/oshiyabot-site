@@ -42,6 +42,7 @@ export function ContactPage({ onClose, isDesktop = false }: ContactPageProps) {
                 width={160}
                 height={160}
                 className="w-40 h-40 rounded-full object-cover border-4 border-purple-300"
+                priority
               />
               <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-4 border-white flex items-center justify-center">
                 <span className="text-white text-xl">✨</span>
