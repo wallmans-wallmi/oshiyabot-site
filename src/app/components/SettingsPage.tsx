@@ -88,7 +88,7 @@ export function SettingsPage({ onClose, isDesktop }: SettingsPageProps) {
   }, [newProductGoal]);
 
   return (
-    <div className={`${isDesktop ? 'h-full min-h-full overflow-y-auto bg-gradient-to-br from-purple-50 to-pink-50' : 'min-h-screen bg-gradient-to-br from-purple-50 to-pink-50'}`} dir="rtl">
+    <div className={`${isDesktop ? 'h-full min-h-full overflow-y-auto bg-gradient-to-br from-purple-50 to-pink-50' : 'overflow-y-auto bg-gradient-to-br from-purple-50 to-pink-50'}`} dir="rtl" style={!isDesktop ? { minHeight: '100dvh', height: '100dvh' } : undefined}>
       {/* Header - only show close button on mobile */}
       {!isDesktop && (
       <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">
@@ -128,8 +128,8 @@ export function SettingsPage({ onClose, isDesktop }: SettingsPageProps) {
           
             <div className="space-y-6">
               {/* Toggle */}
-              <div className="flex items-center justify-between py-3">
-                <label htmlFor="whatsapp-toggle" className="flex-1 cursor-pointer text-gray-900">
+              <div className="flex items-center justify-between w-full py-3 gap-3">
+                <label htmlFor="whatsapp-toggle" className="flex-1 cursor-pointer text-gray-900 text-right">
                   קבלת התראות בוואטסאפ
                 </label>
                 <Switch

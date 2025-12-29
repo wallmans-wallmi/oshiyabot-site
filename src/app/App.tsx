@@ -3290,6 +3290,7 @@ export default function App() {
                 width={56}
                 height={56}
                 className="w-14 h-14 rounded-full object-cover object-center border-2 border-purple-300"
+                priority
               />
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
@@ -3799,7 +3800,9 @@ export default function App() {
       {/* Chat messages - scrollable */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 pb-24 bg-gradient-to-br from-purple-50 to-pink-50"
+        className={`flex-1 overflow-y-auto px-4 pb-24 bg-gradient-to-br from-purple-50 to-pink-50 ${
+          !isDesktop && activeTab === 'deals' && deals.length > 0 ? 'pt-0' : 'py-4'
+        }`}
         style={{ 
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch',
@@ -3900,7 +3903,7 @@ export default function App() {
 
           {/* Filter tabs - only for deals page */}
           {activeTab === 'deals' && deals.length > 0 && (
-            <div className="sticky top-[56px] md:top-[64px] bg-gradient-to-br from-purple-50 to-pink-50 -mx-4 z-[9] border-b border-gray-200">
+            <div className={`sticky top-[56px] md:top-[64px] bg-gradient-to-br from-purple-50 to-pink-50 -mx-4 z-[9] border-b border-gray-200 ${!isDesktop ? 'pt-2' : ''}`}>
               <div className="px-4">
                 <div className={`flex gap-6 justify-center transition-all duration-300 ${
                   dealsScrolled ? 'py-2 pb-2.5' : 'py-3 pb-3.5'

@@ -119,7 +119,7 @@ export function ProfilePage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50" dir="rtl">
+    <div className={`${isDesktop ? 'h-full min-h-full overflow-y-auto' : 'overflow-y-auto'} bg-gradient-to-br from-purple-50 to-pink-50`} dir="rtl" style={!isDesktop ? { minHeight: '100dvh', height: '100dvh' } : undefined}>
       {/* Header - only show close button on mobile */}
       {!isDesktop && (
       <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">

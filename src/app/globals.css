@@ -117,18 +117,8 @@
     font-size: var(--font-size);
   }
 
-  /* Mobile-specific: Prevent full-page scroll - container handles scrolling */
-  @media (max-width: 767px) {
-    html {
-      overflow: hidden;
-      height: 100%;
-    }
-    body {
-      overflow: hidden;
-      height: 100%;
-      position: relative;
-    }
-  }
+  /* Mobile-specific: Prevent full-page scroll only for chat interface */
+  /* Note: Static pages (Profile, Settings, etc.) need to scroll, so we don't block html/body scrolling globally */
 
   h1 {
     font-size: var(--text-2xl);

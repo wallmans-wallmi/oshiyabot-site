@@ -8,7 +8,7 @@ interface AccessibilityStatementPageProps {
 
 export function AccessibilityStatementPage({ onClose, isDesktop = false }: AccessibilityStatementPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 overflow-y-auto" dir="rtl">
+    <div className="bg-gradient-to-br from-purple-50 to-pink-50 overflow-y-auto" dir="rtl" style={{ minHeight: '100dvh', height: '100dvh' }}>
       {/* Header */}
       <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">
         <div className="max-w-3xl mx-auto flex items-center justify-between">

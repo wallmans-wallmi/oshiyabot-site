@@ -8,7 +8,7 @@ interface TermsPageProps {
 
 export function TermsPage({ onClose, isDesktop = false }: TermsPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 overflow-y-auto" dir="rtl">{/* Outer wrapper */}
+    <div className="bg-gradient-to-br from-purple-50 to-pink-50 overflow-y-auto" dir="rtl" style={{ minHeight: '100dvh', height: '100dvh' }}>{/* Outer wrapper */}
       {/* Header */}
       <div className="sticky top-0 bg-gradient-to-br from-purple-50 to-pink-50 px-4 py-3 z-10">{/* Header container */}
         <div className="max-w-3xl mx-auto flex items-center justify-between">{/* Header flex content */}
