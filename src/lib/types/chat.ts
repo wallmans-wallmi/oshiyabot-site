@@ -1,4 +1,6 @@
 import { ReactNode } from 'react';
+import { type Gender } from '@/lib/utils/genderPhrasing';
+import { type IntakeState } from './intakeState';
 
 export interface Message {
   id: number | string;
@@ -31,6 +33,7 @@ export interface InlineInput {
 export interface ConversationState {
   path: 'initial' | 'has-product' | 'needs-help';
   step: number;
+  intakeState?: IntakeState; // Optional semantic state tracking
   productData: {
     name?: string;
     link?: string;
@@ -43,6 +46,8 @@ export interface ConversationState {
     budget?: string;
     phone?: string;
     firstName?: string;
+    gender?: Gender;
+    phoneVerified?: boolean; // Track if phone number has been verified via OTP
   };
 }
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Sparkles, Send, Bell, Info, Menu, X, Image as ImageIcon, ExternalLink, MessageCircle, Settings, EllipsisVertical, Pause, Trash2, Pencil, ChevronDown, User, Eye, Cookie, Scale } from 'lucide-react';
+import { Sparkles, Send, Info, Menu, X, Image as ImageIcon, ExternalLink, MessageCircle, EllipsisVertical, Pause, Trash2, Pencil, ChevronDown, Eye, Cookie, Scale } from 'lucide-react';
 
 // Extend Window interface for console navigation helper
 declare global {
@@ -28,12 +28,14 @@ import { ContactPage } from './components/ContactPage';
 import { ProfilePage } from './components/ProfilePage';
 import { TrackingsPage } from './components/TrackingsPage';
 import { LooksPage } from './components/LooksPage';
+import { HeaderMenu } from './components/HeaderMenu';
 import { AccessibilityButton } from './components/AccessibilityButton';
 import { AccessibilityMenu } from './components/AccessibilityMenu';
 import { ImageUploaderDemo } from './components/ImageUploaderDemo';
 import { InlineInputs } from './components/InlineInputs';
-import { createNameRequestMessage, createNameConfirmationSequence, createAccountCreatedMessage, createAccountDeclinedMessage } from './utils/nameRequestFlow';
-import { LoginPage } from './components/LoginPage';
+import { createAccountCreatedMessage, createAccountDeclinedMessage } from './utils/nameRequestFlow';
+import { buildGenderAwareSystemPrompt, type Gender } from '@/lib/utils/genderPhrasing';
+import { LoginFlow } from './components/LoginFlow';
 import { OTPVerification } from './components/OTPVerification';
 import { AccountPage } from './components/AccountPage';
 import { SettingsPage } from './components/SettingsPage';
@@ -70,9 +72,12 @@ interface InlineInput {
   inputMode?: 'text' | 'numeric' | 'tel';
 }
 
+import { type IntakeState } from '@/lib/types/intakeState';
+
 interface ConversationState {
   path: 'initial' | 'has-product' | 'needs-help';
   step: number;
+  intakeState?: IntakeState; // Optional semantic state tracking for OTP flow
   productData: {
     name?: string;
     link?: string;
@@ -85,7 +90,8 @@ interface ConversationState {
     budget?: string;
     phone?: string;
     firstName?: string;
-    gender?: 'male' | 'female';
+    gender?: Gender;
+    phoneVerified?: boolean; // Track if phone number has been verified via OTP
     target_type?: 'target_price' | 'percent_drop';
     target_value?: number;
   };
@@ -433,7 +439,14 @@ export default function App() {
     });
   };
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Initialize isLoggedIn from localStorage on mount
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedIsLoggedIn = localStorage.getItem('oshiya-logged-in');
+      return savedIsLoggedIn === 'true';
+    }
+    return false;
+  });
   const [otpPhone, setOtpPhone] = useState('');
   const [shouldShowWelcomeBack, setShouldShowWelcomeBack] = useState(false);
   const [otpReturnPage, setOtpReturnPage] = useState<'chat' | 'account' | 'profile'>('chat');
@@ -504,12 +517,9 @@ export default function App() {
   useEffect(() => {
     const savedMessages = localStorage.getItem('oshiya-messages');
     const savedConversationState = localStorage.getItem('oshiya-conversation-state');
-    const savedIsLoggedIn = localStorage.getItem('oshiya-logged-in');
     const isFirstVisit = localStorage.getItem('oshiyafirstvisit') === null;
 
-    if (savedIsLoggedIn === 'true') {
-      setIsLoggedIn(true);
-    }
+    // Login state is already initialized from localStorage in useState, so we don't need to set it here
 
     // If there are saved messages, restore them (this overrides initial messages)
     if (savedMessages && savedConversationState) {
@@ -795,9 +805,11 @@ export default function App() {
       const conversationMessages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
       
       // Always include system message for needs-help flow to maintain context
+      const userGender = conversationState.productData.gender || null;
+      const basePrompt = 'המשתמש מבקש עזרה למצוא מוצר שמתאים לצרכים שלו. אתה עוזר דיגיטלי בשם אושייה. שאל שאלות כדי להבין: סוג המוצר (קטגוריה), מה חשוב לו במוצר, והתקציב שלו. השתמש בעברית ובתרבות ישראלית. היה ידידותי ומקצועי.';
       conversationMessages.push({
         role: 'system',
-        content: 'המשתמש מבקש עזרה למצוא מוצר שמתאים לצרכים שלו. אתה עוזר דיגיטלי בשם אושייה. שאל שאלות כדי להבין: סוג המוצר (קטגוריה), מה חשוב לו במוצר, והתקציב שלו. השתמש בעברית ובתרבות ישראלית. היה ידידותי ומקצועי.',
+        content: buildGenderAwareSystemPrompt(userGender, basePrompt),
       });
       
       // Add conversation history (user and assistant messages)
@@ -1411,7 +1423,9 @@ export default function App() {
       // Send initial system prompt to AI
       setIsTyping(true);
       
-      const systemPrompt = 'המשתמש מבקש עזרה למצוא מוצר שמתאים לצרכים שלו. אתה עוזר דיגיטלי בשם אושייה. התחל בכך שתשאל את המשתמש שאלות כדי להבין מה הוא מחפש. שאל על: סוג המוצר (קטגוריה), מה חשוב לו במוצר, והתקציב שלו. השתמש בעברית ובתרבות ישראלית. היה ידידותי ומקצועי.';
+      const userGender = conversationState.productData.gender || null;
+      const basePrompt = 'המשתמש מבקש עזרה למצוא מוצר שמתאים לצרכים שלו. אתה עוזר דיגיטלי בשם אושייה. התחל בכך שתשאל את המשתמש שאלות כדי להבין מה הוא מחפש. שאל על: סוג המוצר (קטגוריה), מה חשוב לו במוצר, והתקציב שלו. השתמש בעברית ובתרבות ישראלית. היה ידידותי ומקצועי.';
+      const systemPrompt = buildGenderAwareSystemPrompt(userGender, basePrompt);
       
       // Prepare initial messages for AI
       const initialMessages = [
@@ -1635,42 +1649,20 @@ export default function App() {
       }
       
       const maskedPhone = phone.slice(0, 3) + '***' + phone.slice(-4);
-      setConversationState(prev => ({ ...prev, step: 7, productData: { ...prev.productData, phone: phone } }));
+      // Store phone temporarily (will be saved after OTP verification)
+      setConversationState(prev => ({ 
+        ...prev, 
+        step: 8, // Move to waiting_for_otp_verification step
+        intakeState: 'waiting_for_otp_verification',
+        productData: { ...prev.productData, phone: phone } 
+      }));
       setMessages(prev => [...prev, { id: Date.now(), type: 'user', content: maskedPhone, timestamp: new Date() }]);
       
-      // Check if we have firstName already
-      const hasFirstName = conversationState.productData.firstName;
-      
-      setTimeout(() => {
-        setIsTyping(true);
-        setTimeout(() => {
-          if (!hasFirstName) {
-            // Ask for first name
-            setMessages(prev => [...prev, {
-              id: Date.now() + 1,
-              type: 'assistant',
-              content: 'רק שאדע איך לפנות אלייך – איך לקרוא לך?',
-              contentJSX: (
-                <div>
-                  <p className="mb-2">רק שאדע איך לפנות אלייך – איך לקרוא לך?</p>
-                  <InlineInputs
-                    inputs={[{ id: 'firstName', type: 'text', placeholder: 'שם פרטי' }]}
-                    submitLabel="סגור, שלחי"
-                    onSubmit={(nameValues) => {
-                      handleQuickReply(`name-submit:${nameValues.firstName}`);
-                    }}
-                  />
-                </div>
-              ),
-              timestamp: new Date(),
-            }]);
-          } else {
-            // Show tracking confirmation
-            handleQuickReply('show-tracking-confirmation');
-          }
-          setIsTyping(false);
-        }, 800);
-      }, 500);
+      // Trigger OTP verification
+      const phoneE164 = '+972' + phone.slice(1); // Convert 05XXXXXXXX to +9725XXXXXXXX
+      setOtpPhone(phoneE164);
+      setOtpReturnPage('chat');
+      setCurrentPage('otp');
       return;
     }
 
@@ -2189,7 +2181,9 @@ export default function App() {
 דרישות: ${productData.requirements || 'לא צוין'}
 `.trim();
           
-          const systemPrompt = 'עזור לי לחשב יעד מחיר הגיוני להנחה לפי תחום המוצר והמחיר. תן לי תשובה בפורמט: "target_type:percent_drop" או "target_type:target_price" ואחריו "target_value:מספר". למשל: "target_type:percent_drop target_value:10" או "target_type:target_price target_value:2500".';
+          const userGender = conversationState.productData.gender || null;
+          const basePricePrompt = 'עזור לי לחשב יעד מחיר הגיוני להנחה לפי תחום המוצר והמחיר. תן לי תשובה בפורמט: "target_type:percent_drop" או "target_type:target_price" ואחריו "target_value:מספר". למשל: "target_type:percent_drop target_value:10" או "target_type:target_price target_value:2500".';
+          const systemPrompt = buildGenderAwareSystemPrompt(userGender, basePricePrompt);
           
           const aiMessages = [
             {
@@ -2438,29 +2432,20 @@ export default function App() {
                                   
                                   const retryPhone = retryValues.phone.replace(/\s/g, '');
                                   const maskedPhone = retryPhone.slice(0, 3) + '***' + retryPhone.slice(-4);
-                                  setConversationState(prev => ({ ...prev, step: 7, productData: { ...prev.productData, phone: retryPhone } }));
+                                  // Store phone temporarily (will be saved after OTP verification)
+                                  setConversationState(prev => ({ 
+                                    ...prev, 
+                                    step: 8, // Move to waiting_for_otp_verification step
+                                    intakeState: 'waiting_for_otp_verification',
+                                    productData: { ...prev.productData, phone: retryPhone } 
+                                  }));
                                   setMessages(prev => [...prev, { id: Date.now(), type: 'user', content: maskedPhone, timestamp: new Date() }]);
-                                  setTimeout(() => {
-                                    setIsTyping(true);
-                                    setTimeout(() => {
-                                      setMessages(prev => [...prev, { id: Date.now() + 1, type: 'assistant', content: 'מעולה 🙌\nשמרתי. אני אקפוץ לוואטסאפ ברגע שיש משהו ששווה לעצור בשבילו.', timestamp: new Date() }]);
-                                      setIsTyping(false);
-                                      setConversationState(prev => ({ ...prev, step: 8 }));
-                                      
-                                      // Ask for first name
-                                      setTimeout(() => {
-                                        setIsTyping(true);
-                                        setTimeout(() => {
-                                          const nameRequest = createNameRequestMessage((firstName) => {
-                                            setConversationState(prev => ({ ...prev, step: 9, productData: { ...prev.productData, firstName } }));
-                                            createNameConfirmationSequence(firstName, setMessages, setIsTyping, !isLoggedIn, handleQuickReply);
-                                          });
-                                          setMessages(prev => [...prev, nameRequest]);
-                                          setIsTyping(false);
-                                        }, 800);
-                                      }, 1200);
-                                    }, 800);
-                                  }, 500);
+                                  
+                                  // Trigger OTP verification
+                                  const phoneE164 = '+972' + retryPhone.slice(1); // Convert 05XXXXXXXX to +9725XXXXXXXX
+                                  setOtpPhone(phoneE164);
+                                  setOtpReturnPage('chat');
+                                  setCurrentPage('otp');
                                 }}
                               />
                             </div>
@@ -2472,30 +2457,20 @@ export default function App() {
                       }
                       
                       const maskedPhone = phone.slice(0, 3) + '***' + phone.slice(-4);
-                      setConversationState(prev => ({ ...prev, step: 7, productData: { ...prev.productData, phone: phone } }));
+                      // Store phone temporarily (will be saved after OTP verification)
+                      setConversationState(prev => ({ 
+                        ...prev, 
+                        step: 8, // Move to waiting_for_otp_verification step
+                        intakeState: 'waiting_for_otp_verification',
+                        productData: { ...prev.productData, phone: phone } 
+                      }));
                       setMessages(prev => [...prev, { id: Date.now(), type: 'user', content: maskedPhone, timestamp: new Date() }]);
                       
-                      setTimeout(() => {
-                        setIsTyping(true);
-                        setTimeout(() => {
-                          setMessages(prev => [...prev, { id: Date.now() + 1, type: 'assistant', content: 'מעולה 🙌\nשמרתי. אני אקפוץ לוואטסאפ ברגע שיש משהו ששווה לעצור בשבילו.', timestamp: new Date() }]);
-                          setIsTyping(false);
-                          setConversationState(prev => ({ ...prev, step: 8 }));
-                          
-                          // Ask for first name
-                          setTimeout(() => {
-                            setIsTyping(true);
-                            setTimeout(() => {
-                              const nameRequest = createNameRequestMessage((firstName) => {
-                                setConversationState(prev => ({ ...prev, step: 9, productData: { ...prev.productData, firstName } }));
-                                createNameConfirmationSequence(firstName, setMessages, setIsTyping, !isLoggedIn, handleQuickReply);
-                              });
-                              setMessages(prev => [...prev, nameRequest]);
-                              setIsTyping(false);
-                            }, 800);
-                          }, 1200);
-                        }, 800);
-                      }, 500);
+                      // Trigger OTP verification
+                      const phoneE164 = '+972' + phone.slice(1); // Convert 05XXXXXXXX to +9725XXXXXXXX
+                      setOtpPhone(phoneE164);
+                      setOtpReturnPage('chat');
+                      setCurrentPage('otp');
                     }}
                   />
                 </div>
@@ -3077,10 +3052,15 @@ export default function App() {
               productData: { ...prev.productData, firstName: newName }
             }));
           }}
-          onUpdatePhone={(newPhone) => {
+          onUpdatePhone={async (newPhone) => {
+            // Phone is already verified in ProfilePage, just update it
             setConversationState(prev => ({
               ...prev,
-              productData: { ...prev.productData, phone: newPhone }
+              productData: {
+                ...prev.productData,
+                phone: newPhone,
+                phoneVerified: true
+              }
             }));
           }}
           onUpdateGender={(gender) => {
@@ -3119,6 +3099,7 @@ export default function App() {
         <TrackingsPage 
           onBack={() => setCurrentPage('chat')}
           deals={deals}
+          onNavigateToChat={() => setCurrentPage('chat')}
         />
       )}
       
@@ -3129,14 +3110,28 @@ export default function App() {
       {!isDesktop && currentPage === 'accessibility-statement' && <AccessibilityStatementPage onClose={() => setCurrentPage('chat')} />}
       {currentPage === 'ui-foundations' && <UIFoundationsPage onClose={() => setCurrentPage('chat')} />}
       {currentPage === 'login' && (
-        <LoginPage 
-          onClose={() => setCurrentPage('chat')} 
-          onSendOTP={(phone) => {
-            setOtpPhone(phone);
-            setOtpReturnPage('chat');
-            setCurrentPage('otp');
-          }}
-        />
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          <LoginFlow 
+            onClose={() => setCurrentPage('chat')} 
+            onSuccess={() => {
+              setIsLoggedIn(true);
+              setCurrentPage('chat');
+              // Add welcome back message to chat
+              setTimeout(() => {
+                setIsTyping(true);
+                setTimeout(() => {
+                  setMessages(prev => [...prev, {
+                    id: Date.now(),
+                    type: 'assistant',
+                    content: 'היי! חזרת! 🎉\nכיף לי לראות אותך שוב.\nעל מה בא לך שנדבר?',
+                    timestamp: new Date(),
+                  }]);
+                  setIsTyping(false);
+                }, 800);
+              }, 300);
+            }}
+          />
+        </div>
       )}
       {currentPage === 'otp' && (
         <OTPVerification
@@ -3146,27 +3141,101 @@ export default function App() {
               setCurrentPage('account');
             } else if (otpReturnPage === 'profile') {
               setCurrentPage('profile');
+            } else if (otpReturnPage === 'chat') {
+              // If closing OTP from chat flow, return to chat (user cancelled verification)
+              setCurrentPage('chat');
             } else {
               setCurrentPage('login');
             }
           }}
-          onVerify={() => {
-            // Check if user has existing conversation
-            const hasExistingConversation = messages.length > 2;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          onVerify={async (_code: string) => {
+            // Convert E.164 phone back to Israeli format (05XXXXXXXX)
+            const israeliPhone = otpPhone.startsWith('+972') 
+              ? '0' + otpPhone.slice(4) 
+              : otpPhone;
             
-            setIsLoggedIn(true);
-            
-            // If returning user with conversation, show welcome-back message when they return to chat
-            if (hasExistingConversation && otpReturnPage === 'chat') {
-              setShouldShowWelcomeBack(true);
-            }
-            
-            // Return to the page that initiated OTP
-            if (otpReturnPage === 'account' || otpReturnPage === 'profile') {
-              setCurrentPage(otpReturnPage);
-            } else {
+            // If OTP was triggered from chat flow (phone submission during onboarding)
+            if (otpReturnPage === 'chat') {
+              // Mark phone as verified and continue with the flow
+              setConversationState(prev => ({
+                ...prev,
+                step: 9, // Move past OTP verification step
+                productData: {
+                  ...prev.productData,
+                  phone: israeliPhone,
+                  phoneVerified: true
+                }
+              }));
+              
+              // Check if we have firstName already to continue the flow
+              const hasFirstName = conversationState.productData.firstName;
+              
+              // Return to chat and continue with next step
               setCurrentPage('chat');
+              
+              // Continue the flow after OTP verification
+              setTimeout(() => {
+                setIsTyping(true);
+                setTimeout(() => {
+                  if (!hasFirstName) {
+                    // Ask for first name
+                    setMessages(prev => [...prev, {
+                      id: Date.now() + 1,
+                      type: 'assistant',
+                      content: 'רק שאדע איך לפנות אלייך – איך לקרוא לך?',
+                      contentJSX: (
+                        <div>
+                          <p className="mb-2">רק שאדע איך לפנות אלייך – איך לקרוא לך?</p>
+                          <InlineInputs
+                            inputs={[{ id: 'firstName', type: 'text', placeholder: 'שם פרטי' }]}
+                            submitLabel="סגור, שלחי"
+                            onSubmit={(nameValues) => {
+                              handleQuickReply(`name-submit:${nameValues.firstName}`);
+                            }}
+                          />
+                        </div>
+                      ),
+                      timestamp: new Date(),
+                    }]);
+                  } else {
+                    // Show tracking confirmation
+                    handleQuickReply('show-tracking-confirmation');
+                  }
+                  setIsTyping(false);
+                }, 800);
+              }, 500);
+            } else if (otpReturnPage === 'profile') {
+              // Update phone in profile after verification
+              setConversationState(prev => ({
+                ...prev,
+                productData: {
+                  ...prev.productData,
+                  phone: israeliPhone,
+                  phoneVerified: true
+                }
+              }));
+              setCurrentPage('profile');
+            } else {
+              // Login flow - mark as logged in
+              setIsLoggedIn(true);
+              
+              // Check if user has existing conversation
+              const hasExistingConversation = messages.length > 2;
+              
+              // If returning user with conversation, show welcome-back message when they return to chat
+              if (hasExistingConversation) {
+                setShouldShowWelcomeBack(true);
+              }
+              
+              // Return to the page that initiated OTP
+              if (otpReturnPage === 'account') {
+                setCurrentPage('account');
+              } else {
+                setCurrentPage('chat');
+              }
             }
+            
             // Reset for next time
             setOtpReturnPage('chat');
           }}
@@ -3318,72 +3387,13 @@ export default function App() {
             </button>
 
             {/* האזור שלי - דרופדאון */}
-              <div 
-                className="relative dropdown-container"
-              >
-                <button 
-                  onClick={() => setOpenDropdown(openDropdown === 'myArea' ? null : 'myArea')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                  currentPage === 'account' || currentPage === 'settings' || currentPage === 'profile' || currentPage === 'login'
-                      ? 'text-purple-700 bg-purple-50' 
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <Bell className="w-4 h-4" />
-                  <span>האזור שלי</span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-                
-                {openDropdown === 'myArea' && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                  {isLoggedIn ? (
-                    <>
-                    <button
-                      onClick={() => {
-                        setCurrentPage('profile');
-                        setOpenDropdown(null);
-                      }}
-                      className="w-full text-right px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center gap-2"
-                    >
-                      <User className="w-4 h-4" />
-                      <span>הפרופיל שלי</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCurrentPage('chat');
-                        setActiveTab('deals');
-                        setOpenDropdown(null);
-                      }}
-                      className="w-full text-right px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center gap-2"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>המעקבים שלי</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCurrentPage('settings');
-                        setOpenDropdown(null);
-                      }}
-                      className="w-full text-right px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center gap-2"
-                    >
-                      <Settings className="w-4 h-4" />
-                      <span>ההגדרות שלי</span>
-                    </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setCurrentPage('login');
-                        setOpenDropdown(null);
-                      }}
-                      className="w-full text-right px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center gap-2"
-                    >
-                      <span>התחברות</span>
-                    </button>
-                )}
-              </div>
-            )}
-            </div>
+            <HeaderMenu
+              currentPage={currentPage}
+              onNavigate={(page) => setCurrentPage(page as PageType)}
+              onOpenDropdown={(dropdown) => setOpenDropdown(dropdown)}
+              openDropdown={openDropdown as 'myArea' | 'oshiya' | null}
+              onSetActiveTab={(tab: 'chat' | 'looks' | 'deals') => setActiveTab(tab)}
+            />
 
             {/* אושייה - דרופדאון */}
             <div 
@@ -4824,10 +4834,15 @@ export default function App() {
                   productData: { ...prev.productData, firstName: newName }
                 }));
               }}
-              onUpdatePhone={(newPhone) => {
+              onUpdatePhone={async (newPhone) => {
+                // Phone is already verified in ProfilePage, just update it
                 setConversationState(prev => ({
                   ...prev,
-                  productData: { ...prev.productData, phone: newPhone }
+                  productData: {
+                    ...prev.productData,
+                    phone: newPhone,
+                    phoneVerified: true
+                  }
                 }));
               }}
               onUpdateGender={(gender) => {
@@ -4941,6 +4956,7 @@ export default function App() {
             <TrackingsPage 
               onBack={() => setCurrentPage('chat')}
               deals={deals}
+              onNavigateToChat={() => setCurrentPage('chat')}
               isDesktop={true}
             />
           )}

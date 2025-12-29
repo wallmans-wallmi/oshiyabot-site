@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { User, Edit2, Plus, X, Crown, LogOut } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { User, Edit2, Plus, X, Crown, LogOut, ArrowLeft } from 'lucide-react';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
+import { type Gender } from '@/lib/utils/genderPhrasing';
 
 interface ProfilePageProps {
   onBack: () => void;
   firstName?: string;
   phoneNumber?: string;
-  gender?: 'male' | 'female';
+  gender?: Gender;
   onUpdateName?: (newName: string) => void;
-  onUpdatePhone?: (newPhone: string) => void;
-  onUpdateGender?: (gender: 'male' | 'female' | null) => void;
+  onUpdatePhone?: (newPhone: string) => Promise<void>;
+  onUpdateGender?: (gender: Gender) => void;
   isLoggedIn?: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -50,8 +51,14 @@ export function ProfilePage({
   const [editedName, setEditedName] = useState(firstName || '');
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [editedPhone, setEditedPhone] = useState(phoneNumber || '');
+  const [initialPhone, setInitialPhone] = useState(phoneNumber || ''); // Track initial phone when editing starts
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const [otpError, setOtpError] = useState('');
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [pendingPhoneForOTP, setPendingPhoneForOTP] = useState('');
   const [isEditingGender, setIsEditingGender] = useState(false);
-  const [editedGender, setEditedGender] = useState<'male' | 'female' | null>(gender || null);
+  const [editedGender, setEditedGender] = useState<Gender>(gender || null);
   const [renewalReminderEnabled, setRenewalReminderEnabled] = useState(true);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -63,6 +70,14 @@ export function ProfilePage({
     }
   }, [gender, isEditingGender]);
 
+  // Sync editedPhone when phoneNumber prop changes (when not editing)
+  useEffect(() => {
+    if (!isEditingPhone && !showOTPVerification) {
+      setEditedPhone(phoneNumber || '');
+      setInitialPhone(phoneNumber || '');
+    }
+  }, [phoneNumber, isEditingPhone, showOTPVerification]);
+
   const handleSaveName = () => {
     if (editedName.trim() && onUpdateName) {
       onUpdateName(editedName.trim());
@@ -70,11 +85,166 @@ export function ProfilePage({
     setIsEditingName(false);
   };
 
-  const handleSavePhone = () => {
-    if (editedPhone.trim() && onUpdatePhone) {
-      onUpdatePhone(editedPhone.trim());
+  const handleSavePhone = async () => {
+    const trimmedPhone = editedPhone.trim().replace(/\s/g, '');
+    const isValidIsraeliPhone = /^05\d{8}$/.test(trimmedPhone);
+
+    if (!isValidIsraeliPhone) {
+      alert('מספר טלפון לא תקין. אנא הזינו מספר בתבנית 05XXXXXXXX');
+      return;
     }
-    setIsEditingPhone(false);
+
+    // Convert to E.164 format
+    const phoneE164 = '+972' + trimmedPhone.slice(1);
+
+    // Store the phone and send OTP
+    setPendingPhoneForOTP(trimmedPhone);
+    setOtpError('');
+    
+    try {
+      // Send OTP
+      const response = await fetch('/api/otp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_e164: phoneE164 }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send OTP');
+      }
+
+      // Show OTP verification inline
+      setShowOTPVerification(true);
+      // Focus first OTP input after a brief delay to ensure it's rendered
+      setTimeout(() => {
+        otpInputRefs.current[0]?.focus();
+      }, 100);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'שגיאה בשליחת הקוד. נסו שוב.';
+      alert(errorMessage);
+    }
+  };
+
+  // Handle OTP input change
+  const handleOTPChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return; // Only allow digits
+
+    const newCode = [...otpCode];
+    newCode[index] = value.slice(-1); // Only take last character
+    setOtpCode(newCode);
+    setOtpError('');
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-submit when all filled
+    if (newCode.every(digit => digit) && index === 5) {
+      handleOTPVerify(newCode.join(''));
+    }
+  };
+
+  // Handle OTP keydown (backspace)
+  const handleOTPKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const [isOTPVerifying, setIsOTPVerifying] = useState(false);
+  const [isOTPSuccess, setIsOTPSuccess] = useState(false);
+
+  // Handle OTP verification
+  const handleOTPVerify = async (codeStr?: string) => {
+    const verificationCode = codeStr || otpCode.join('');
+    
+    if (verificationCode.length !== 6) {
+      setOtpError('אנא הזינו את כל הספרות');
+      return;
+    }
+
+    setIsOTPVerifying(true);
+    setOtpError('');
+
+    try {
+      if (!pendingPhoneForOTP) {
+        throw new Error('מספר טלפון לא זמין');
+      }
+
+      // Convert to E.164 format
+      const phoneE164 = '+972' + pendingPhoneForOTP.slice(1);
+
+      // Verify OTP via API
+      const verifyResponse = await fetch('/api/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_e164: phoneE164, code: verificationCode }),
+      });
+
+      if (!verifyResponse.ok) {
+        const data = await verifyResponse.json();
+        throw new Error(data.error || 'Invalid OTP code');
+      }
+
+      // Update phone via API
+      const updateResponse = await fetch('/api/user/update-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_e164: phoneE164 }),
+      });
+
+      if (!updateResponse.ok) {
+        const data = await updateResponse.json();
+        throw new Error(data.error || 'Failed to update phone number');
+      }
+
+      // Update local state via callback (only to sync with parent state, no navigation)
+      // This is safe because onUpdatePhone in App.tsx only updates conversationState
+      if (onUpdatePhone) {
+        await onUpdatePhone(pendingPhoneForOTP);
+      }
+
+      setIsOTPSuccess(true);
+      
+      // Update editedPhone to show the new number immediately
+      setEditedPhone(pendingPhoneForOTP);
+      setInitialPhone(pendingPhoneForOTP);
+      
+      // Reset OTP state after showing success
+      setTimeout(() => {
+        setOtpCode(['', '', '', '', '', '']);
+        setOtpError('');
+        setShowOTPVerification(false);
+        setIsEditingPhone(false);
+        setPendingPhoneForOTP('');
+        setIsOTPVerifying(false);
+        setIsOTPSuccess(false);
+      }, 2000);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'קוד שגוי. נסו שוב.';
+      setOtpError(errorMessage);
+      setIsOTPVerifying(false);
+    }
+  };
+
+  // Handle OTP resend
+  const handleOTPResend = () => {
+    // TODO: Implement OTP resend API call
+    console.log('Resending OTP to:', pendingPhoneForOTP);
+    setOtpCode(['', '', '', '', '', '']);
+    setOtpError('');
+  };
+
+  // Handle cancel OTP verification
+  const handleCancelOTP = () => {
+    setShowOTPVerification(false);
+    setOtpCode(['', '', '', '', '', '']);
+    setOtpError('');
+    setPendingPhoneForOTP('');
+    // Return to editing phone
+    setIsEditingPhone(true);
   };
 
   const handleSaveGender = () => {
@@ -83,6 +253,12 @@ export function ProfilePage({
     }
     setIsEditingGender(false);
   };
+
+  // Check if phone value has changed from initial value
+  // Save button should be enabled if:
+  // 1. Phone has changed from initial value (for editing existing number), OR
+  // 2. Phone is not empty and initial was empty (for first-time entry)
+  const hasPhoneChanged = editedPhone.trim() !== initialPhone.trim() && editedPhone.trim() !== '';
 
   // Check if gender value has changed
   const hasGenderChanged = editedGender !== gender;
@@ -163,27 +339,32 @@ export function ProfilePage({
             <div className="bg-white rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-gray-900">הכינוי שלי</h3>
-                {!isEditingName && (
-                  <button
-                    onClick={() => {
+                <button
+                  onClick={() => {
+                    if (isEditingName) {
+                      setIsEditingName(false);
+                      setEditedName(firstName || '');
+                    } else {
                       setIsEditingName(true);
                       setEditedName(firstName || '');
-                    }}
-                    className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
-                  >
-                    {firstName ? (
-                      <>
-                        <Edit2 className="w-4 h-4" />
-                        <span className="text-sm">ערוך</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        <span className="text-sm">הוסף</span>
-                      </>
-                    )}
-                  </button>
-                )}
+                    }
+                  }}
+                  className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
+                >
+                  {isEditingName ? (
+                    <X className="w-4 h-4" />
+                  ) : firstName ? (
+                    <>
+                      <Edit2 className="w-4 h-4" />
+                      <span className="text-sm">עריכה</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span className="text-sm">הוספה</span>
+                    </>
+                  )}
+                </button>
               </div>
               {isEditingName ? (
                 <div className="space-y-3">
@@ -220,53 +401,138 @@ export function ProfilePage({
             <div className="bg-white rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-gray-900">WhatsApp</h3>
-                {!isEditingPhone && (
-                  <button
-                    onClick={() => {
+                <button
+                  onClick={() => {
+                    if (isEditingPhone) {
+                      setIsEditingPhone(false);
+                      setEditedPhone(initialPhone);
+                      setShowOTPVerification(false);
+                      setPendingPhoneForOTP('');
+                    } else {
                       setIsEditingPhone(true);
-                      setEditedPhone(phoneNumber || '');
-                    }}
-                    className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
-                  >
-                    {phoneNumber ? (
-                      <>
-                        <Edit2 className="w-4 h-4" />
-                        <span className="text-sm">ערוך</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        <span className="text-sm">הוסף</span>
-                      </>
-                    )}
-                  </button>
-                )}
+                      const currentPhone = phoneNumber || '';
+                      setEditedPhone(currentPhone);
+                      setInitialPhone(currentPhone); // Store initial value when editing starts
+                    }
+                  }}
+                  className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
+                >
+                  {isEditingPhone ? (
+                    <X className="w-4 h-4" />
+                  ) : phoneNumber ? (
+                    <>
+                      <Edit2 className="w-4 h-4" />
+                      <span className="text-sm">עריכה</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span className="text-sm">הוספה</span>
+                    </>
+                  )}
+                </button>
               </div>
               {isEditingPhone ? (
-                <div className="space-y-3">
-                  <input
-                    type="tel"
-                    value={editedPhone}
-                    onChange={(e) => setEditedPhone(e.target.value)}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none font-mono"
-                    placeholder="מספר טלפון"
-                    dir="ltr"
-                  />
-                  <div className="flex gap-2">
+                showOTPVerification ? (
+                  // OTP Verification UI
+                  <div className="space-y-4">
+                    <div className="text-center py-2">
+                      <p className="text-gray-600 text-sm mb-1">
+                        שלחנו לך קוד בוואטסאפ
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        למספר {pendingPhoneForOTP.slice(0, 3) + '***' + pendingPhoneForOTP.slice(-4)}
+                      </p>
+                    </div>
+                    
+                    {/* OTP Input */}
+                    <div dir="ltr" className="flex gap-2 justify-center">
+                      {otpCode.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={el => { otpInputRefs.current[index] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOTPChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                          className="w-12 h-12 text-center text-lg font-semibold rounded-lg border-2 border-gray-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white transition-all duration-200 disabled:opacity-50"
+                          aria-label={`Digit ${index + 1}`}
+                          disabled={isOTPVerifying || isOTPSuccess}
+                        />
+                      ))}
+                    </div>
+
+                    {otpError && (
+                      <p className="text-sm text-red-500 text-center">{otpError}</p>
+                    )}
+
                     <button
-                      onClick={handleSavePhone}
-                      className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                      onClick={() => handleOTPVerify()}
+                      className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
                     >
-                      שמור
+                      <span>אישור</span>
+                      <ArrowLeft className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => setIsEditingPhone(false)}
-                      className="flex-1 border-2 border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      ביטול
-                    </button>
+
+                    {!isOTPSuccess && (
+                      <>
+                        <div className="text-center">
+                          <button
+                            onClick={handleOTPResend}
+                            disabled={isOTPVerifying}
+                            className="text-sm text-purple-600 hover:text-purple-700 underline disabled:text-gray-400 disabled:cursor-not-allowed"
+                          >
+                            לא קיבלתי קוד - שלחו שוב
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={handleCancelOTP}
+                          disabled={isOTPVerifying}
+                          className="w-full border-2 border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          ביטול
+                        </button>
+                      </>
+                    )}
                   </div>
-                </div>
+                ) : (
+                  // Phone Input UI
+                  <div className="space-y-3">
+                    <input
+                      type="tel"
+                      value={editedPhone}
+                      onChange={(e) => setEditedPhone(e.target.value)}
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none font-mono"
+                      placeholder="מספר טלפון"
+                      dir="ltr"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSavePhone}
+                        disabled={!hasPhoneChanged}
+                        className={`flex-1 py-2 rounded-lg transition-colors ${
+                          hasPhoneChanged
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                      >
+                        שמור
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditingPhone(false);
+                          setEditedPhone(initialPhone); // Revert to initial value on cancel
+                        }}
+                        className="flex-1 border-2 border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        ביטול
+                      </button>
+                    </div>
+                  </div>
+                )
               ) : (
                 <p className="text-gray-600 text-lg font-normal font-mono" dir="ltr" style={{ textAlign: 'right' }}>
                   {phoneNumber || 'לא הוגדר מספר'}
@@ -281,18 +547,32 @@ export function ProfilePage({
                   <h3 className="font-semibold text-gray-900">איך לפנות אליך</h3>
                   <p className="text-xs text-gray-500 mt-1">רק כדי שאדע אם לפנות אליך בלשון זכר או נקבה</p>
                 </div>
-                {!isEditingGender && (
-                  <button
-                    onClick={() => {
+                <button
+                  onClick={() => {
+                    if (isEditingGender) {
+                      setEditedGender(gender || null);
+                      setIsEditingGender(false);
+                    } else {
                       setIsEditingGender(true);
                       setEditedGender(gender || null);
-                    }}
-                    className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    <span className="text-sm">עריכה</span>
-                  </button>
-                )}
+                    }
+                  }}
+                  className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
+                >
+                  {isEditingGender ? (
+                    <X className="w-4 h-4" />
+                  ) : gender ? (
+                    <>
+                      <Edit2 className="w-4 h-4" />
+                      <span className="text-sm">עריכה</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span className="text-sm">הוסף</span>
+                    </>
+                  )}
+                </button>
               </div>
               {isEditingGender ? (
                 <div className="space-y-3">

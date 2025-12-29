@@ -85,6 +85,14 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validationResult.data;
 
+    // Check if Supabase is configured
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured. Please set Supabase environment variables.' },
+        { status: 500 }
+      );
+    }
+
     // Insert into Supabase Watch table
     const { error } = await supabase
       .from('Watch')

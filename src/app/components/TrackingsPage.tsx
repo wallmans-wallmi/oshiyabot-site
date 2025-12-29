@@ -9,6 +9,7 @@ interface TrackingsPageProps {
   onBack: () => void;
   deals: Deal[];
   onDealClick?: (dealId: number) => void;
+  onNavigateToChat?: () => void;
   isDesktop?: boolean;
 }
 
@@ -16,6 +17,7 @@ export function TrackingsPage({
   onBack, 
   deals = [],
   onDealClick,
+  onNavigateToChat,
   isDesktop = false
 }: TrackingsPageProps) {
   const [isAccessibilityMenuOpen, setIsAccessibilityMenuOpen] = useState(false);
@@ -152,9 +154,18 @@ export function TrackingsPage({
                 <Package className="w-10 h-10 text-purple-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">עדיין אין מעקבים</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-6">
                 בואי נתחיל לעקוב אחרי המוצר הראשון שלך! 🙂
               </p>
+              {onNavigateToChat && (
+                <button
+                  onClick={onNavigateToChat}
+                  className="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition-all duration-200 hover:scale-105 shadow-md inline-flex items-center gap-2"
+                >
+                  <Package className="w-5 h-5" />
+                  <span>חזרה לצ&apos;אט</span>
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -46,6 +46,7 @@ function RadioButton({ id, name, value, checked, onChange, label }: RadioButtonP
 }
 
 export function SettingsPage({ onClose, isDesktop }: SettingsPageProps) {
+
   // Section 1 - Notifications
   const [whatsappNotifications, setWhatsappNotifications] = useState(() => {
     const saved = localStorage.getItem('oshiya-whatsapp-notifications');
@@ -279,6 +280,7 @@ export function SettingsPage({ onClose, isDesktop }: SettingsPageProps) {
           // Note: Navigation to accessibility statement would need to be handled by parent
         }}
       />
+
     </div>
   );
 }
