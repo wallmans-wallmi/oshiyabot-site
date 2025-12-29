@@ -84,6 +84,9 @@ export function ProfilePage({
     setIsEditingGender(false);
   };
 
+  // Check if gender value has changed
+  const hasGenderChanged = editedGender !== gender;
+
   // Custom Radio Button Component (reused from SettingsPage pattern)
   const RadioButton = ({ id, name, value, checked, onChange, label }: {
     id: string;
@@ -286,17 +289,8 @@ export function ProfilePage({
                     }}
                     className="flex items-center gap-2 text-gray-700 hover:text-gray-800 transition-colors"
                   >
-                    {gender ? (
-                      <>
-                        <Edit2 className="w-4 h-4" />
-                        <span className="text-sm">ערוך</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        <span className="text-sm">הוסף</span>
-                      </>
-                    )}
+                    <Edit2 className="w-4 h-4" />
+                    <span className="text-sm">עריכה</span>
                   </button>
                 )}
               </div>
@@ -323,7 +317,12 @@ export function ProfilePage({
                   <div className="flex gap-2">
                     <button
                       onClick={handleSaveGender}
-                      className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                      disabled={!hasGenderChanged}
+                      className={`flex-1 py-2 rounded-lg transition-colors ${
+                        hasGenderChanged
+                          ? 'bg-purple-600 text-white hover:bg-purple-700'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
                     >
                       שמור
                     </button>
@@ -339,7 +338,7 @@ export function ProfilePage({
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-600 text-lg font-normal">
+                <p className="text-gray-600 text-lg font-normal font-mono">
                   {gender === 'male' ? 'גבר' : gender === 'female' ? 'אישה' : 'לא הוגדר'}
                 </p>
               )}
